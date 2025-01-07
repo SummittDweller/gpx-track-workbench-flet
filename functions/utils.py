@@ -72,7 +72,7 @@ def make_gpx_from_dataframe(df):
 #   that can be used to save the updated dataframe back to the working copy GPX file.
 # --------------------------------------------------------------------
 def save_working_copy(st, df):
-    if st.button("Save a Working Copy of Changes Made", icon="💥", help=f"Click to save a working copy of your GPX changes"):
+    if st.button("Save the Working Copy of Changes Made", icon="💥", help=f"Click to save a working copy of your GPX changes"):
         gpx = make_gpx_from_dataframe(df)
 
         # Replace our working GPX file with this new GPX

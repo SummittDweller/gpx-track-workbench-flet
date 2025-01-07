@@ -44,6 +44,22 @@ If that does not work, or to debug in VSCode, you should be more specific, like 
 
 ...or just open the `app.py` file in VSCode and then `start the debugger from within the project's VSCode environment`.  
 
+# Basic Operation
+
+The app is controled by the left-hand sidebar where the user is promoted to navigate to and choose one or more GPX files using [st.file_uploader](https://docs.streamlit.io/develop/api-reference/widgets/st.file_uploader).  The function returns a list of `UploadedFile` objects saved in `st.session_state.file_list`.  There are NOT files or filenames!  Each `UploadedFile` object has a `.name` property and `ByteIO` contents.  
+
+If a user "loads" one individual "file" it is automatically saved in a temporary "working copy" (`TEMP_DIR`) directory where it is also renamed to ensure there are no spaces in the filename. It is this "working copy" that populates the application's dataframe, and any changes made in the dataframe may be saved back into the "working copy", NOT the original choosen file!  
+
+If the user elects to operate on all chosen files "in-bulk", each `UploadedFile` from `st.session_state.file_list` each will have a saved "working copy" in `TEMP_DIR`.  All operations impact the "working copy" file, NOT the original file!     
+
+## st.session_state.file_list
+
+As mentioned above, the list of `UploadedFile` objects is always held in the `file_list` session_state element.
+
+## st.session_state.df
+
+This session_state variable always holds the path of the current "working copy" file which.  This will NOT be the same as the original file!  Note that `session_state` cannot reliably hold a Pandas dataframe so functions are provided to `serialize` and `deserialize` working copy GPX files into CSV files and/or dataframes.  
+
 <div style="background-color: whitesmoke; color: black; border: 3px solid red; text-align: center; padding: 1em; margin: 1em;">
 What follows is from the original 'Streamlit File Browser' project.  The information below may be obsolete! 
 </div>

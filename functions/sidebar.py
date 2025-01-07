@@ -48,10 +48,10 @@ def sidebar(st):
         uploaded_file = load_one_file(st)
         if uploaded_file:
             u.load_file_to_dataframe(st, uploaded_file)
-        st.session_state.process = st.radio("Choose what to do with the loaded file", ["Display", "Edit", "Add Speed Tags"], index=None)
+        label = f"🚀 Choose what to do with the loaded file"    
+        st.session_state.process = st.radio(label, ["Display", "Edit", "Add Speed Tags"], index=None)
+        st.divider( )
         
-    st.divider( )
-
 
 # clear_selection(st) - Callback for the "Reset!" button with 'st' passed
 #
@@ -76,7 +76,8 @@ def load_one_file(st):
         for file in files:
             list.append(file.name)
 
-        option = st.selectbox("Choose one file to load for processing", list)
+        label = f"🔄 Choose one file to load for processing"
+        option = st.selectbox(label, list)
 
         index = list.index(option)
         gpx = u.load_file_to_dataframe(st, files[index])
