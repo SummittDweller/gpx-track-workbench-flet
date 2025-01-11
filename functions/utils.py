@@ -80,7 +80,7 @@ def save_working_copy(st, df):
 
         # Write the temporary GPX file
         with open(working, 'w') as f:
-          f.write(gpx.to_xml( ))
+            f.write(gpx.to_xml( ))
 
         # Report
         msg = f"Working copy file '{working}' was replaced with our dataframe contents"
@@ -134,6 +134,18 @@ def edit_gpx(st):
     #     st.status(f"No GPX changes made.")
 
 
+# reload(st) - Reload the dataframe from the working file
+# --------------------------------------------------------------------
+def reload(st):
+    msg = f"reload( ) has been called!"
+    # st.write(msg)
+    state('logger').info(msg)
+
+    if not state('df'):
+        st.error(f"GPX dataframe is NOT loaded!")
+        return False
+
+
 # load_file_to_dataframe(st, uploaded_file) - Load the selected GPX file to our dataframe
 #   and return the gpxpy GPX object
 # ---------------------------------------------------------------------------------
@@ -168,12 +180,13 @@ def load_file_to_dataframe(st, uploaded_file):
     df = serialize_dataframe(st, dataframe, uploaded_file.name)
     msg = f"Route info from {df} is serialized in {c.DF_CSV}!"
     state('logger').info(msg)
-    st.write(msg)
+    # st.write(msg)
 
     # Get track center lifted from https://www.google.com/search?client=firefox-b-1-d&q=python+gpx+track+center
     # st.session_state.center = get_track_center(gpx)
 
     return gpx
+
 
 # save_temp_gpx(st, gpx) - The load function above returns a gpx object, 
 #   save a TEMP copy of the file from that gpx data.
@@ -185,8 +198,9 @@ def save_temp_gpx(st, gpx):
     new_pathname = rename_file_in_place(new_path)
     msg = f"A working copy of this GPX file has been saved in '{new_pathname}'."
     state('logger').info(msg)
-    st.write(msg)
+    # st.write(msg)
     st.session_state.df = new_pathname
+    return new_pathname
 
 
 # get_track_center - From a gpxpy "parsed" gpx file
@@ -224,6 +238,7 @@ def deserialize_dataframe( ):
     df = pd.read_csv(c.DF_CSV)
     return df
 
+
 # run_command(command) - Run a subprocess command
 # ----------------------------------------------------------------------------
 def run_command(command):
@@ -243,6 +258,7 @@ def run_command(command):
         return False
 
     return True
+
 
 # make_temp( ) - Return our TEMP_DIR/TEMP_FILE path
 # ------------------------------------------------------------------------

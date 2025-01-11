@@ -27,6 +27,13 @@ def sidebar(st):
         state('logger').info(f"uploaded_files is FALSE") 
         count = 0
 
+    # Save each of the uploaded files to our working directory
+    if count > 0:
+        for uf in uploaded_files:
+            gpx = u.load_file_to_dataframe(st, uf)
+            new = u.save_temp_gpx(st, gpx)
+            st.session_state.working_list.append(new)
+
     state('logger').info(f"file_index is: {state('file_index')}") 
 
     # Display number of selected files
@@ -48,8 +55,8 @@ def sidebar(st):
         uploaded_file = load_one_file(st)
         if uploaded_file:
             u.load_file_to_dataframe(st, uploaded_file)
-        label = f"🚀 Choose what to do with the loaded file"    
-        st.session_state.process = st.radio(label, ["Display", "Edit", "Add Speed Tags"], index=None)
+        label = f"🚀 Choose what to do with the loaded dataframe"    
+        st.session_state.process = st.radio(label, ["Display", "Edit", "Add Speed Tags", "Reload"], index=None)
         st.divider( )
         
 
@@ -59,6 +66,7 @@ def sidebar(st):
 # -------------------------------------------------------------------------------
 def clear_selection(st):
     st.session_state.file_list = []
+    st.session_state.working_list = []
     st.session_state.file_index = False
     st.session_state.file_count = 0
     st.session_state.uploader_key += 1    # increment file_uploader key to clear it

@@ -34,6 +34,8 @@ if __name__ == '__main__':
         st.session_state.uploader_key = 0   # initialzie file_uploader key so it can be easily reset
     if not state('file_list'):
         st.session_state.file_list = None
+    if not state('working_list'):
+        st.session_state.working_list = []
     if not state('file_count'):                 
         st.session_state.file_count = 0    # track the number of selected files
     if not state('file_index'):                 
@@ -73,6 +75,8 @@ if __name__ == '__main__':
     elif process == "Edit":
         u.edit_gpx(st)    
     elif process == "Add Speed Tags":
+        u.add_speed_tags(st)    
+    elif process == "Reload":
         u.add_speed_tags(st)    
     else:
         st.write("Nothing much going on here!")    
