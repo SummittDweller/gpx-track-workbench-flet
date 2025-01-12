@@ -8,6 +8,7 @@ from functions import constants as c
 import os
 import shutil
 import subprocess as s
+import WorkingGPX as WG
 
 # From https://github.com/JAlcocerT/Py_RouteTracker/blob/main/app.py
 import folium
@@ -32,11 +33,20 @@ def prep_uploaded(st, uploaded):
 
     for up in uploaded:
         # Save each of the uploaded files to our working directory
-        (df, gpx) = load_uploaded_to_dataframe(st, up)
-        if gpx:
-            new = save_temp_gpx(st, gpx, up.name)
-            st.session_state.working_list.append(new)
-            st.session_state.uploaded_list.append(up.name)
+        w = WG.WorkingGPX(up)
+        msg = f"New WorkingGPX.status from {up.name} is: {w.status}"
+        state('logger').info(msg)
+        st.info(msg)
+
+        if w:
+            st.session_state.working_list.append(w)
+            st.session_state.uploaded_list.append(w.alias)
+
+        # (df, gpx) = load_uploaded_to_dataframe(st, up)
+        # if gpx:
+        #     new = save_temp_gpx(st, gpx, up.name)
+        #     st.session_state.working_list.append(new)
+        #     st.session_state.uploaded_list.append(up.name)
         else:
             msg = f"Unable to load/parse GPX upload '{up.name}'.  It has been removed from the uploaded list."
             state('logger').warning(msg)

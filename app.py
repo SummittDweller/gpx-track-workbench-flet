@@ -9,6 +9,7 @@ import shutil
 import streamlit as st
 from loguru import logger
 from st_click_detector import click_detector as did_click
+import WorkingGPX as wgpx
 
 # From https://github.com/JAlcocerT/Py_RouteTracker/blob/main/app.py
 import folium
