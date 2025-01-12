@@ -12,11 +12,12 @@ class WorkingGPX(object):
         self.alias = None
         self.fullname = None
         self.status = "Incomplete"
+        
+        # Identify what type of source we have
+        t = type(source)
+        # st.info(f"Constructor 'source' is type: {t}")
 
         # If source type is a Streamlit UploadedFile object...
-        t = type(source)
-        st.info(f"Constructor 'source' is type: {t}")
-        
         if t == st.runtime.uploaded_file_manager.UploadedFile:
             self.alias = source.name
             (df, gpx) = u.load_uploaded_to_dataframe(st, source)
