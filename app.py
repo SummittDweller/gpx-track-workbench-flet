@@ -10,6 +10,7 @@ import streamlit as st
 from loguru import logger
 from st_click_detector import click_detector as did_click
 import WorkingGPX as wgpx
+import pprint
 
 # From https://github.com/JAlcocerT/Py_RouteTracker/blob/main/app.py
 import folium
@@ -21,6 +22,41 @@ from io import BytesIO
 # Common function abbreviations
 # -------------------------------------------------------------------------------
 state = u.state
+
+# In the sidebar display the UploadFile controls
+# ------------------------------------------------------------------------
+def uploader(st):
+    count = 0
+
+    # File upload/selector
+    uploaded = st.sidebar.file_uploader("Upload GPX files", key=f"uploader_{state('uploader_key')}", type=["gpx"], accept_multiple_files=True)
+    u.print_state(st)
+
+    if uploaded:
+        state('logger').info(f"uploaded is TRUE")
+        count = u.prep_uploaded(st, uploaded)
+        st.session_state.count = count
+        st.session_state.index = 1 
+        u.print_state( )
+    else:
+        state('logger').info(f"uploaded_files is FALSE") 
+
+    state('logger').info(f"index is: {state('index')}") 
+
+    # Display number of selected files
+    # plural logic from https://stackoverflow.com/questions/21872366/plural-string-formatting
+    if count:
+        msg = f"You have {count} file{'s'[:count^1]} uploaded."  
+        state('logger').info(msg)
+        st.sidebar.success(msg)  
+        if st.sidebar.button(f"Reset!", icon="💥", help=f"Double-click to clear your selected file list and return to selection of files."):
+            u.clear_selection(st)
+            count = 0
+    else:
+        st.sidebar.warning(f"You have uploaded NO files!")
+
+    st.sidebar.divider( )
+
 
 # MAIN ---------------------------------------------------------
 
@@ -60,17 +96,16 @@ if __name__ == '__main__':
     # In the main window...
     # -------------------------------------------------------------------------------
 
-    # Display the app header
-    st.header(c.APP_TITLE, divider=True)
+    # Display the app title
+    st.title(c.APP_TITLE)
 
     # Add a sidebar for control. All data/display should take place in the main window.
     # -------------------------------------------------------------------------------
 
-    # Display and process the left sidebar 
-    with st.sidebar:
-      s.sidebar(st)
+    # Do the Uploader...
+    uploader(st)
 
-    # No longer in the sidebar... take action
+    # Take action
     process = state('process')
 
     if process == "Display":
@@ -82,5 +117,5 @@ if __name__ == '__main__':
     elif process == "Reload":
         u.add_speed_tags(st)    
     else:
-        st.write("Nothing much going on here!")    
+        st.write("Nothing much going on here!  Choose an action.")    
 

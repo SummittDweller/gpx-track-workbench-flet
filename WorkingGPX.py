@@ -1,4 +1,4 @@
-# Create the WorkingGPX class 
+# Create the WorkingGPX and WGPXList classes 
 
 import streamlit as st
 from functions import utils as u
@@ -38,4 +38,19 @@ class WorkingGPX(object):
     def add_radius(self, r):
         self.radius = self.radius + r
         return(self.radius)
+    
+
+class GPXList( ):
+    
+    # Constructor
+    def __init__(self):
+        self.list = dict( )
+
+    # Methods
+    # --------------------------------------------------------------------
+
+    def append(self, object):
+        self.list[object.alias] = object
+        count = len(self.list)
+        return count
     

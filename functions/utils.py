@@ -16,6 +16,14 @@ from streamlit_folium import st_folium
 import gpxpy
 import pandas as pd
 from io import BytesIO
+import pprint
+
+
+# Pretty print the session_state IF that option is on
+def print_state(st, msg=None):
+    if st.sidebar.checkbox("Print Session State?", key='state_checkbox'):
+        st.header(f"Session State {msg}", divider=True)
+        pprint.pprint(st.session_state)  # see https://discuss.streamlit.io/t/how-to-pprint-st-session-state-for-readable-inspection/73650
 
 
 # prep_uploaded(st, uploaded) - Prepare working copies of the uploaded list IF the 
@@ -24,35 +32,38 @@ from io import BytesIO
 def prep_uploaded(st, uploaded):
     
     count = len(uploaded)
+    # st.write(f"prep_uploaded:27 : <br/>{st.session_state}")
     
     # Check the session_state so the uploaded files NEVER replace the working copies!
     if state('prepared'):
         return count
         
-    st.session_state.uploaded_list = []
+    # Create an empty GPXList    
+    gpxList = WG.GPXList( )
+    st.session_state.uploaded_list = gpxList
+    # st.write(f"prep_uploaded:36 : <br/>{st.session_state}")
 
+    # Loop on the list of UploadedFile objects 
     for up in uploaded:
-        # Save each of the uploaded files to our working directory
+        # Create a single WorkingGPX object for each of the uploaded objects
         w = WG.WorkingGPX(up)
         msg = f"New WorkingGPX.status from {up.name} is: {w.status}"
         state('logger').info(msg)
         st.info(msg)
 
-        if w:
-            st.session_state.working_list.append(w)
-            st.session_state.uploaded_list.append(w.alias)
+        # Add the new WorkingGPX object to our GPXList
+        count = gpxList.append(w)
+        st.session_state.working_list = gpxList
+        # st.session_state.uploaded_list.append(w.alias)
 
-        # (df, gpx) = load_uploaded_to_dataframe(st, up)
-        # if gpx:
-        #     new = save_temp_gpx(st, gpx, up.name)
-        #     st.session_state.working_list.append(new)
-        #     st.session_state.uploaded_list.append(up.name)
-        else:
-            msg = f"Unable to load/parse GPX upload '{up.name}'.  It has been removed from the uploaded list."
-            state('logger').warning(msg)
-            st.warning(msg)
-            uploaded.remove(up)
-            count -= 1
+        # else:
+        #     msg = f"Unable to load/parse GPX upload '{up.name}'.  It has been removed from the uploaded list."
+        #     state('logger').warning(msg)
+        #     st.warning(msg)
+        #     uploaded.remove(up)
+        #     count -= 1
+
+    print_state(st, 'prep_uploaded:65')
 
     # Set the session_state so the uploaded files do not replace the working copies!
     st.session_state.prepared = True    
