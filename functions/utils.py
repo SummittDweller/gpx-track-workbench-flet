@@ -17,6 +17,39 @@ import pandas as pd
 from io import BytesIO
 
 
+# prep_uploaded(st, uploaded) - Prepare working copies of the uploaded list IF the 
+# list has not yet been prepared (or they have been "Reset").
+# -----------------------------------------------------------------------------------
+def prep_uploaded(st, uploaded):
+    
+    count = len(uploaded)
+    
+    # Check the session_state so the uploaded files NEVER replace the working copies!
+    if state('prepared'):
+        return count
+        
+    st.session_state.uploaded_list = []
+
+    for up in uploaded:
+        # Save each of the uploaded files to our working directory
+        (df, gpx) = load_uploaded_to_dataframe(st, up)
+        if gpx:
+            new = save_temp_gpx(st, gpx, up.name)
+            st.session_state.working_list.append(new)
+            st.session_state.uploaded_list.append(up.name)
+        else:
+            msg = f"Unable to load/parse GPX upload '{up.name}'.  It has been removed from the uploaded list."
+            state('logger').warning(msg)
+            st.warning(msg)
+            uploaded.remove(up)
+            count -= 1
+
+    # Set the session_state so the uploaded files do not replace the working copies!
+    st.session_state.prepared = True    
+
+    return count
+
+
 # state(key) - Return the value of st.session_state[key] or False
 # If state is set and equal to "None", return False.
 # -------------------------------------------------------------------------------
@@ -32,14 +65,21 @@ def state(key):
         # st.exception(f"Exception: {e}")
         return False
 
+# Actions -------------------------------------------------------------------------
 
 # add_speed_tags(st)
 # -----------------------------------------------------------------------
 def add_speed_tags(st):
-    msg = f"add_speed_tags( ) has been called!"
-    st.write(msg)
-    state('logger').info(msg)
-    gpsBabel_add_speed( )
+    wp = state('working_path')
+
+    # This is a file operation, so no dataframe or GPX file handling needed here.
+    if wp:
+        msg = f"add_speed_tags(st, '{wp}') has been called!"
+        st.write(msg)
+        state('logger').info(msg)
+        if gpsBabel_add_speed(st, wp):
+            return  
+            # edit_df(st)  # Load and edit the new working_path
 
 
 # display_gpx(st)
@@ -48,6 +88,38 @@ def display_gpx(st):
     msg = f"display_gpx( ) has been called!"
     st.write(msg)
     state('logger').info(msg)
+
+
+# edit_df(st) - Load and edit the 'working_path' dataframe of GPX data
+# --------------------------------------------------------------------
+def edit_df(st):
+    wp = state('working_path')
+    msg = f"edit_df(st) has been called for '{wp}'!"
+    # st.write(msg)
+    state('logger').info(msg)
+
+    if wp:
+        msg = f"To remove track points select one or more rows on the left then use the trashcan icon to remove them."
+        st.write(msg)
+    
+        # Load the working_path GPX to our dataframe.
+        (df, gpx) = load_working_to_dataframe(st, wp)
+        # st.dataframe(df)
+
+        # Display the associated dataframe w/ edit capability
+        rows = int(df.size / 5)
+        st.write(f"Loaded {rows} rows of data from '{wp}'...")
+
+        # Edit the dataframe
+        new_df = st.data_editor(df, num_rows='dynamic', key='editor')
+
+        # Present a button below the dataframe that can be used to save the updated 
+        # dataframe back to the working_path file.
+        result = save_working_copy(st, new_df)
+    else:
+        st.error(f"GPX dataframe is NOT loaded!")
+        return False
+
 
 
 # make_gpx_from_dataframe(df) - Return a gpxpy GPX structure from a dataframe
@@ -68,70 +140,27 @@ def make_gpx_from_dataframe(df):
     return gpx
 
 
-# save_working_copy(st, dataframe) - Present a button below the dataframe 
+# save_working_copy(st, df) - Present a button below the dataframe 
 #   that can be used to save the updated dataframe back to the working copy GPX file.
 # --------------------------------------------------------------------
 def save_working_copy(st, df):
     if st.button("Save the Working Copy of Changes Made", icon="💥", help=f"Click to save a working copy of your GPX changes"):
         gpx = make_gpx_from_dataframe(df)
-
-        # Replace our working GPX file with this new GPX
-        working = os.path.join(c.TEMP_DIR, state('df'))
+        wp = state('working_path')    
 
         # Write the temporary GPX file
-        with open(working, 'w') as f:
+        with open(wp, 'w') as f:
             f.write(gpx.to_xml( ))
 
         # Report
-        msg = f"Working copy file '{working}' was replaced with our dataframe contents"
+        msg = f"Working copy file '{wp}' was replaced with our dataframe contents."  
         st.success(msg)
         state('logger').info(msg)
 
-        return True
+        # Put us back into datafream edit mode    
+        edit_df(st)
 
-
-# edit_gpx(st) - Edit the loaded dataframe of GPX data
-# --------------------------------------------------------------------
-def edit_gpx(st):
-    msg = f"edit_gpx( ) has been called!"
-    # st.write(msg)
-    state('logger').info(msg)
-
-    msg = f"To remove track points select one or more rows on the left then use the trashcan icon to remove them."
-    st.write(msg)
-
-    if not state('df'):
-        st.error(f"GPX dataframe is NOT loaded!")
-        return False
-
-    # Deserialzie the session_state dataframe!
-    df = deserialize_dataframe( )
-    # st.dataframe(df)
-
-    # Display the associated dataframe w/ edit capability
-    rows = int(df.size / 5)
-    st.write(f"Loaded {rows} rows of data from '{state('df')}'...")
-
-    # Edit the dataframe and serialize it for session_state
-    df = st.data_editor(df, num_rows='dynamic', key='editor')
-    st.session_state.df = serialize_dataframe(st, df, state('df'))
-
-    # Present a button below the dataframe that can be used to save the updated 
-    # dataframe back to the original GPX file.
-    result = save_working_copy(st, df)
-
-    # rows2 = int(state('df').size / 5)
-    # st.write(f"Edited GPX dataframe has {rows2} of data...")
-
-    # # If edited, write the dataframe to our TEMP_FILE and replace our current_file with the TEMP_FILE
-    # if rows2 < rows:
-    #     write_dataframe_to_gpx(state('df'))
-    #     temp = os.path.join(c.TEMP_DIR, c.TEMP_FILE)
-    #     current = state('current_file')
-    #     shutil.copy(temp, current)
-    #     st.success(f"GPX file '{current}' replaced with {rows2} rows of edited data.")
-    # else:
-    #     st.status(f"No GPX changes made.")
+        return
 
 
 # reload(st) - Reload the dataframe from the working file
@@ -146,14 +175,48 @@ def reload(st):
         return False
 
 
-# load_file_to_dataframe(st, uploaded_file) - Load the selected GPX file to our dataframe
-#   and return the gpxpy GPX object
+# load_working_to_dataframe(st, working_path) - Load the working copy of a GPX to our dataframe
+#   and return the dataframe and gpxpy GPX object
 # ---------------------------------------------------------------------------------
-def load_file_to_dataframe(st, uploaded_file):
-    gpx_contents = uploaded_file.read( )
-    gpx_file = BytesIO(gpx_contents)
-    gpx = gpxpy.parse(gpx_file)
+def load_working_to_dataframe(st, working_path):
+    gpx = False
 
+    try:
+        with open(working_path) as w:
+            gpx_contents = w.read( )
+            gpx = gpxpy.parse(gpx_contents)
+    except Exception as e:
+        st.exception(f"Exception: {e}")
+        return False
+    
+    (df, gpx) = load_to_dataframe(st, gpx, working_path)
+
+    return (df, gpx)
+
+
+# load_uploaded_to_dataframe(st, uploaded) - Load a GPX upload into our dataframe
+#   and return the serialized dataframe and GPX
+# ---------------------------------------------------------------------------------
+def load_uploaded_to_dataframe(st, uploaded):
+    gpx = False
+    
+    try:
+        gpx_contents = uploaded.read( )
+        gpx_file = BytesIO(gpx_contents)
+        gpx = gpxpy.parse(gpx_file)
+    except Exception as e:
+        st.exception(f"Exception: {e}")
+        return False
+
+    (df, gpx) = load_to_dataframe(st, gpx, uploaded.name)
+
+    return (df, gpx)
+
+    
+# load_to_dataframe(st, gpx, name) - Load a GPX structure into our dataframe
+#   and return the serialized dataframe and GPX
+# ---------------------------------------------------------------------------------
+def load_to_dataframe(st, gpx, name):
     route_info = []
 
     for track in gpx.tracks:
@@ -176,31 +239,29 @@ def load_file_to_dataframe(st, uploaded_file):
     state('logger').info(msg)
 
     # Create a dataframe from the route_info
-    dataframe = pd.DataFrame(route_info)
-    df = serialize_dataframe(st, dataframe, uploaded_file.name)
-    msg = f"Route info from {df} is serialized in {c.DF_CSV}!"
+    df = pd.DataFrame(route_info)
+    # df = serialize_dataframe(st, dataframe, name)               # NO longer part of session_state, no reason to serialize!
+    msg = f"Route info from {name} is now in our dataframe!"
     state('logger').info(msg)
     # st.write(msg)
 
     # Get track center lifted from https://www.google.com/search?client=firefox-b-1-d&q=python+gpx+track+center
     # st.session_state.center = get_track_center(gpx)
 
-    return gpx
+    return (df, gpx)
 
 
-# save_temp_gpx(st, gpx) - The load function above returns a gpx object, 
-#   save a TEMP copy of the file from that gpx data.
+# save_temp_gpx(st, gpx) - The load functions above returns a serailized dataframe object and GPX,
+#   save a TEMP copy of the GPX.
 # ------------------------------------------------------------------------------
-def save_temp_gpx(st, gpx):
-    new_path = os.path.join(c.TEMP_DIR, state('df'))
+def save_temp_gpx(st, gpx, name):
+    new_path = os.path.join(c.TEMP_DIR, working_name(name))
     with open(new_path, 'w') as f:
         f.write(gpx.to_xml( ))
-    new_pathname = rename_file_in_place(new_path)
-    msg = f"A working copy of this GPX file has been saved in '{new_pathname}'."
+    msg = f"A working copy of '{name}' was saved in '{new_path}'."
     state('logger').info(msg)
     # st.write(msg)
-    st.session_state.df = new_pathname
-    return new_pathname
+    return new_path
 
 
 # get_track_center - From a gpxpy "parsed" gpx file
@@ -249,7 +310,7 @@ def run_command(command):
 
     if result.returncode == 0:
         st.success(f"`{cmd}` command executed successfully!")
-        msg = f"Command: {command}\n" + result.stdout + '\n' +  f"GPSBabel successfully added speed tags and to file '{state('current_file')}'."
+        msg = f"Command: {command}\n" + result.stdout + '\n' +  f"GPSBabel successfully added speed tags and to file '{state('working_path')}'."
         st.text_area("Output:", msg, height=160)
     else:
         st.error(f"`{cmd}` command execution failed.")
@@ -277,34 +338,42 @@ def make_temp( ):
     return temp_path
 
 
-# gpsBabel_add_speed( ) - Run GPSBabel to add <speed> tags to the loaded working file.
+# gpsBabel_add_speed(st, working_path) - Run GPSBabel to add <speed> tags to the specified 
+# working path and return success or NO if there are errors.
 # --------------------------------------------------------------------------------------
-def gpsBabel_add_speed( ):
+def gpsBabel_add_speed(st, working_path):
     temp = make_temp( )
-    parts = [ 'gpsbabel', '-t', '-i', 'gpx', '-f', state('df'), '-x', 'track,speed', '-o', 'gpx,gpxver=1.0', '-F', temp ]
+    parts = [ 'gpsbabel', '-t', '-i', 'gpx', '-f', working_path, '-x', 'track,speed', '-o', 'gpx,gpxver=1.0', '-F', temp ]
     command = ' '.join(parts)
     success = run_command(command)
     if success:
-        state('logger').info(f"Copying file {temp} to {state('df')}")
+        state('logger').info(f"Copying file {temp} to '{working_path}'")
         try:
-            shutil.copyfile(temp, state('df'))
+            shutil.copyfile(temp, working_path)
         except Exception as e:
             st.exception(e)
             return False
 
-    return success
+    return success 
+
+
+# working_name(path) - Return a new working file name
+# --------------------------------------------------------------------------------------
+def working_name(path):
+    dir = os.path.dirname(path)
+    file = os.path.basename(path)
+    new_name = os.path.join(c.TEMP_DIR, file.replace(' ','_').lower( ))
+    return new_name
 
 
 # rename_file_in_place(filepath) - Rename a file
 # --------------------------------------------------------------------------------------
 def rename_file_in_place(filepath):
-    st.session_state.current_file = filepath
     dir = os.path.dirname(filepath)
     file = os.path.basename(filepath)
     new_name = os.path.join(dir, file.replace(' ','_').lower( ))
     if new_name != filepath:
         os.rename(filepath, new_name)
-        st.session_state.current_file = new_name
 
     return new_name
 

@@ -46,19 +46,25 @@ If that does not work, or to debug in VSCode, you should be more specific, like 
 
 # Basic Operation
 
-The app is controled by the left-hand sidebar where the user is promoted to navigate to and choose one or more GPX files using [st.file_uploader](https://docs.streamlit.io/develop/api-reference/widgets/st.file_uploader).  The function returns a list of `UploadedFile` objects saved in `st.session_state.file_list`.  There are NOT files or filenames!  Each `UploadedFile` object has a `.name` property and `ByteIO` contents.  
+The app is controled by the left-hand sidebar where the user is promoted to navigate to and choose one or more GPX files using [st.file_uploader](https://docs.streamlit.io/develop/api-reference/widgets/st.file_uploader).  Selecting the GPX files creates a list `UploadedFile` objects.  A temporary file in TEMP_DIR, with a sanitized file name built from the `UploadedFile` `.name` property, is created and the temp file names populate `session_state['working_list']` in parallel to`session_state['uploaded_list']`.  
 
-If a user "loads" one individual "file" it is automatically saved in a temporary "working copy" (`TEMP_DIR`) directory where it is also renamed to ensure there are no spaces in the filename. It is this "working copy" that populates the application's dataframe, and any changes made in the dataframe may be saved back into the "working copy", NOT the original choosen file!  
+Each `UploadedFile` object has a `.name` property and `ByteIO` contents, but once the `working_list` files have been created they are used exclusively.    
 
-If the user elects to operate on all chosen files "in-bulk", each `UploadedFile` from `st.session_state.file_list` each will have a saved "working copy" in `TEMP_DIR`.  All operations impact the "working copy" file, NOT the original file!     
+The most important component in the code is `session_state['working_path']` which holds the complete file path of the CURRENT working file!  The contents of `working_path` is NEVER held in session_state, instead functions are provided to load its GPX data into either a Pandas `dataframe` or `df` variable, or into a `gpxPy` structure usually named `gpx`.    
 
-## st.session_state.file_list
+All operations impact the `working_path` file, NEVER the original file!     
 
-As mentioned above, the list of `UploadedFile` objects is always held in the `file_list` session_state element.
+## st.session_state.uploaded_list
 
-## st.session_state.df
+As mentioned above, the list file names for `UploadedFile` objects is always held in the `uploaded_list` `session_state` element.
 
-This session_state variable always holds the path of the current "working copy" file which.  This will NOT be the same as the original file!  Note that `session_state` cannot reliably hold a Pandas dataframe so functions are provided to `serialize` and `deserialize` working copy GPX files into CSV files and/or dataframes.  
+## st.session_state.working_list
+
+Maintained in parallel to `session_state` `uploaded_list`, this list holds cooresponding working file names, NOT contents. 
+
+## st.session_state.working_path
+
+This `session_state` variable always holds the path of the current "working" file.
 
 <div style="background-color: whitesmoke; color: black; border: 3px solid red; text-align: center; padding: 1em; margin: 1em;">
 What follows is from the original 'Streamlit File Browser' project.  The information below may be obsolete! 
