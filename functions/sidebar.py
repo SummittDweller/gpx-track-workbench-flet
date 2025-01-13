@@ -9,6 +9,7 @@ import WorkingGPX as wgpx
 # ------------------------------------------------------------------------
 state = u.state
 
+
 # sidebar(st)
 #
 # Display the left-hand sidebar for controls and return the path of 
@@ -49,7 +50,7 @@ def sidebar(st):
         uploaded_file = load_one_working_file(st)
         if uploaded_file:
             (df, gpx) = u.load_working_to_dataframe(st, uploaded_file)
-        label = f"🚀 Choose what to do with the loaded dataframe"    
+        label = f"🚀 Choose what to do with the working GPX"    
         st.session_state.process = st.radio(label, ["Display", "Edit", "Add Speed Tags", "Reload"], index=None)
         st.divider( )
         
@@ -59,11 +60,9 @@ def sidebar(st):
 # Reset logic from https://discuss.streamlit.io/t/clear-the-file-uploader-after-using-the-file-data/66178/3
 # -------------------------------------------------------------------------------
 def clear_selection(st):
-    st.session_state.uploaded_list = []
-    st.session_state.working_list = []
+    st.session_state.gpx_list = None
     st.session_state.index = False
     st.session_state.count = 0
-    st.session_state.working_path = False
     st.session_state.preparred = False      # set this so the working copies can be rebuilt from our uploads
     st.session_state.uploader_key += 1    # increment file_uploader key to clear it
     state('logger').info('clear_selection called') 
@@ -76,7 +75,7 @@ def load_one_working_file(st):
     files = state('uploaded_list')
     
     if (files):
-        label = f"🔄 Choose one file to load for processing"
+        label = f"🔄 Choose one GPX to load for processing"
         option = st.selectbox(label, files, index=None)         # wait for a selection and return it
 
         if option:

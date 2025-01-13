@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess as s
 import WorkingGPX as WG
+import inspect
 
 # From https://github.com/JAlcocerT/Py_RouteTracker/blob/main/app.py
 import folium
@@ -18,12 +19,15 @@ import pandas as pd
 from io import BytesIO
 import pprint
 
-
+# print_state(st, line=False)
 # Pretty print the session_state IF that option is on
-def print_state(st, msg=None):
-    if st.sidebar.checkbox("Print Session State?", key='state_checkbox'):
-        st.header(f"Session State {msg}", divider=True)
-        pprint.pprint(st.session_state)  # see https://discuss.streamlit.io/t/how-to-pprint-st-session-state-for-readable-inspection/73650
+# --------------------------------------------------------------------------------
+def print_state(st, line=False):
+    caller = inspect.stack()[1].function
+    if state('print_state_checkbox'):
+        header = f"{caller}:{line} → session_state"
+        st.header(header, divider=True)
+        st.write(st.session_state)
 
 
 # prep_uploaded(st, uploaded) - Prepare working copies of the uploaded list IF the 
@@ -40,21 +44,26 @@ def prep_uploaded(st, uploaded):
         
     # Create an empty GPXList    
     gpxList = WG.GPXList( )
-    st.session_state.uploaded_list = gpxList
+    st.session_state.gpx_list = gpxList
     # st.write(f"prep_uploaded:36 : <br/>{st.session_state}")
+ 
+    with st.container( ):
+        # Loop on the list of UploadedFile objects 
+        for up in uploaded:
+            # Create a single WorkingGPX object for each of the uploaded objects
+            w = WG.WorkingGPX(up)
+            msg = f"New WorkingGPX.status from {up.name} is: {w.status}"
+            state('logger').info(msg)
+            st.info(msg)
 
-    # Loop on the list of UploadedFile objects 
-    for up in uploaded:
-        # Create a single WorkingGPX object for each of the uploaded objects
-        w = WG.WorkingGPX(up)
-        msg = f"New WorkingGPX.status from {up.name} is: {w.status}"
-        state('logger').info(msg)
-        st.info(msg)
+            # Add the new WorkingGPX object to our GPXList
+            count = gpxList.append(w)
+            st.session_state.count = count
+            st.session_state.gpx_list = gpxList
+            # st.session_state.uploaded_list.append(w.alias)
 
-        # Add the new WorkingGPX object to our GPXList
-        count = gpxList.append(w)
-        st.session_state.working_list = gpxList
-        # st.session_state.uploaded_list.append(w.alias)
+    if state('count'): 
+        state('uploaded_status').success(f"You have successfully created **{state('count')}** WorkingGPX objects")
 
         # else:
         #     msg = f"Unable to load/parse GPX upload '{up.name}'.  It has been removed from the uploaded list."
@@ -63,7 +72,7 @@ def prep_uploaded(st, uploaded):
         #     uploaded.remove(up)
         #     count -= 1
 
-    print_state(st, 'prep_uploaded:65')
+    print_state(st, 69)
 
     # Set the session_state so the uploaded files do not replace the working copies!
     st.session_state.prepared = True    
@@ -86,7 +95,9 @@ def state(key):
         # st.exception(f"Exception: {e}")
         return False
 
+
 # Actions -------------------------------------------------------------------------
+
 
 # add_speed_tags(st)
 # -----------------------------------------------------------------------
