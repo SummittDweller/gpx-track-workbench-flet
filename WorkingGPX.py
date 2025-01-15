@@ -1,7 +1,7 @@
 # Create the WorkingGPX and WGPXList classes 
 
 import streamlit as st
-from functions import utils as u
+import functions as f
 
 class WorkingGPX(object):
     
@@ -20,11 +20,11 @@ class WorkingGPX(object):
         # If source type is a Streamlit UploadedFile object...
         if t == st.runtime.uploaded_file_manager.UploadedFile:
             self.alias = source.name
-            (df, gpx) = u.load_uploaded_to_dataframe(st, source)
+            (df, gpx) = f.load_uploaded_to_dataframe(st, source)
             if df.info and gpx:
                 self.df = df
                 self.gpx = gpx
-                self.fullname = u.save_temp_gpx(st, gpx, self.alias)
+                self.fullname = f.save_temp_gpx(st, gpx, self.alias)
                 self.status = "Constructed from UploadedFile"
             else:
                 self.status = "Constructor Failed!"

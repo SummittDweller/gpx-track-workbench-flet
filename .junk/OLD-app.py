@@ -1,7 +1,7 @@
 # GPX-Track-Workbenc/app.py
 
-from functions import constants as c
-from functions import utils as u
+from . import constants as c
+from . import functions as u
 from functions import sidebar as s
 
 import os 

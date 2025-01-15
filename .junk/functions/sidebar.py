@@ -1,7 +1,7 @@
 # sidebar.py
 
-from functions import constants as c
-from functions import utils as u
+from . import constants as c
+from . import functions as u
 import os
 import WorkingGPX as wgpx
 

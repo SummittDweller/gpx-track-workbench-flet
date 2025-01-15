@@ -1,6 +1,14 @@
 # constants.py
 
 APP_TITLE = 'GPX-Track-Workbench'
+
+HOME = "Home (Reset)"
+UPLOAD = 'Upload GPX Data'
+EDIT = 'Edit a GPX'
+MAP = 'Map a GPX Track'
+SPEED = 'Add Speed Tags'
+POST = 'Post Tracks to Hikes'
+
 RAW_GPX_DIR = '/Users/mark/GitHub/GPX-Track-Workbench/sample_data'
 
 TEMP_DIR = '/Users/mark/tmp/'
