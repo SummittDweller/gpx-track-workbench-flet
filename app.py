@@ -13,8 +13,9 @@ from loguru import logger
 from streamlit_option_menu import option_menu
 # from st_click_detector import click_detector as did_click
 import WorkingGPX as wgpx
+import StatusBox as SB
 # import pprint
-# import time
+import time
 
 # From https://github.com/JAlcocerT/Py_RouteTracker/blob/main/app.py
 # import folium
@@ -36,6 +37,8 @@ def on_change(key):
             st.warning("HOME not available")
         case c.UPLOAD:
             st.warning("UPLOAD not available")
+            st.session_state.uploader_status_text = "You called for the Uploader!"
+            f.state('uploader_status').success(f.state('uploader_status_text'))
         case c.EDIT:
             st.warning("EDIT not availabe")
         case c.MAP:
@@ -49,13 +52,68 @@ def on_change(key):
             st.error("Something's wrong in on_change( )")
 
 
+# init_state( )
+# Initialize all of the st.session_state values
+def init_state( ):
+    if not f.state('logger'):
+        logger.add("app.log", rotation="500 MB")
+        logger.info('This is GPX-Track-Workbench/app.py!')
+        st.session_state.logger = logger
+    if not f.state('uploader_key'): 
+        st.session_state.uploader_key = 0   # initialzie file_uploader key so it can be easily reset
+
+
+    if not f.state('prepared'):
+        st.session_state.prepared = False 
+    if not f.state('working_gpx'):
+        st.session_state.working_gpx = None   # our current WorkingGPX object
+    if not f.state('gpx_list'):
+        st.session_state.gpx_list = None   # session_state list of WorkingGPX objects in a GPXList object
+    if not f.state('count'):                 
+        st.session_state.count = 0    # track the number of working files
+    if not f.state('index'):                 
+        st.session_state.index = False    # index to the current working file
+    if not f.state('process'):
+        st.session_state.process = None
+    if not f.state('print_state_checkbox'):
+        st.session_state.print_state_checkbox = None 
+
+    # UI containers
+    if not f.state('uploader_status'):
+        st.session_state.uploader_status = None 
+    if not f.state('uploader_status_text'):
+        st.session_state.uploader_status.text = "Uploader status is currently UNKNOWN" 
+    if not f.state('working_status'):
+        st.session_state.working_status = None 
+    if not f.state('working_status_text'):
+        st.session_state.working_status_text = "WorkingGPX status is currently UNKNOWN"
+
+    # Unused for now
+    if not f.state('gpx_center'):
+        st.session_state.gpx_center = c.MAP_CENTER
+    if not f.state('posted_to_local'):
+        st.session_state.posted_to_local = None      # count of files posted to LOCAL hikes
+    if not f.state('my_path'):                       
+        st.session_state.my_path = c.RAW_GPX_DIR    # set appropriate starting directory
+    if not f.state('mph_limit'):                 
+        st.session_state.mph_limit = c.SPEED_THRESHOLD    # default walking speed threshold for trim
+
+
 # MAIN ---------------------------------------------------------
 
 # Create the sidebar menu
 with st.sidebar:
     selected = option_menu("GPX Track Workbench", [ c.HOME, c.UPLOAD, c.EDIT, c.MAP, c.SPEED, c.POST ], 
     icons=['house-fill', 'cloud-upload-fill', 'pencil', 'map', 'speedometer', 'signpost-split'], 
-    menu_icon="cast", default_index=0, on_change=on_change, key='main_menu')    
+    menu_icon="cast", default_index=0, on_change=on_change, key='main_menu')  
+
+    # Add uploader status text below the menu
+    us = st.session_state.uploader_status = SB.StatusBox('uploader_status')
+    us.update('Is this working?')
+
+    # Add WorkingGPX status text below the uploader status
+    ws = st.session_state.working_status = SB.StatusBox('working_status')
+    ws.update('Yes it is!', 'success')
 
 # Do some things in the main area
 st.write(selected)
