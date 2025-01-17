@@ -29,21 +29,28 @@
 #
 
 import streamlit as st
+from loguru import logger
 
 class StatusBox(object):
     
     # Constructor
     def __init__(self, box='status_box'):
         self.name = box
+        self.mode = 'warning'
         self.text = f"{box}: Initialized"
         with st.sidebar:
             self.container = st.empty( )   # create a Streamlit st.empty( ) container in the sidebar                
             self.container.warning(self.text)        # write our text in the container as a warning
         st.session_state[box] = self
+        # If a logger is defined, repeat the warning there
+        if st.session_state.logger:
+            st.session_state.logger.warning(self.text)
 
-    # update the container message
+
+    # update the container message and type/mode
     def update(self, msg, type='info'):
         self.text = msg
+        self.mode = type
         with self.container:
             match type:
                 case 'info': st.info(msg)
@@ -51,3 +58,25 @@ class StatusBox(object):
                 case 'warning': st.warning(msg)
                 case 'error': st.error(msg)        
                 case _: st.error(f'StatusBox update( ) called with an unknown type: {type}')
+        # If a logger is defined, repeat the message there
+        if st.session_state.logger:
+            log = st.session_state.logger
+            match type:
+                case 'info': log.info(msg)
+                case 'success': log.success(msg)
+                case 'warning': log.warning(msg)
+                case 'error': log.error(msg)        
+                case _: log.error(f'StatusBox update( ) called with an unknown type: {type}')
+
+
+    # display the container as it was before
+    def display(self):
+        msg = self.text
+        type = self.mode
+        with self.container:
+            match type:
+                case 'info': st.info(msg)
+                case 'success': st.success(msg)
+                case 'warning': st.warning(msg)
+                case 'error': st.error(msg)        
+                case _: st.error(f'StatusBox display( ) called with an unknown mode: {type}')

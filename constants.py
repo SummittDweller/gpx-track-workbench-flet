@@ -8,6 +8,7 @@ EDIT = 'Edit a GPX'
 MAP = 'Map a GPX Track'
 SPEED = 'Add Speed Tags'
 POST = 'Post Tracks to Hikes'
+RESET = 'Reset!'
 
 RAW_GPX_DIR = '/Users/mark/GitHub/GPX-Track-Workbench/sample_data'
 

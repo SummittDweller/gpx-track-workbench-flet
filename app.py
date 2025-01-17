@@ -4,6 +4,14 @@
 #
 # uploader_status - A StatusBox object in the sidebar just below the menu
 # working_status - A StatusBox object in the sidebar below the uploader_status container
+# count - Number of loaded WorkingGPX objects to choose from
+# uploader_key - Used for proper function of the file_uploader
+
+# Test the ability to change 'uploader_status' using the state variable.  It works!
+#   f.state('uploader_status').update("This text uses the 'uploader_status' state( ) variable.")
+# # Now, set the working_status text using the stored uploader_status text as an error
+#   f.state('working_status').update(f.state('uploader_status').text, 'error')
+
 
 import constants as c
 import functions as f
@@ -21,6 +29,7 @@ import WorkingGPX as wgpx
 import StatusBox as SB
 # import pprint
 import time
+import inflect
 
 # From https://github.com/JAlcocerT/Py_RouteTracker/blob/main/app.py
 # import folium
@@ -34,17 +43,11 @@ import time
 # ------------------------------------------------------------------------------------------
 def on_change(key):
     selection = st.session_state[key]
-    st.success(f"Selection changed to: {selection}")
-    st.session_state
+    # st.success(f"Selection changed to: {selection}")
+    # st.session_state
 
     # Act on the selected key
     match selection:
-        case c.HOME:    # Delete all the items in Session state to reset EVERYTHING
-            for key in st.session_state.keys( ):
-                del st.session_state[key]
-        case c.UPLOAD:
-            st.warning("UPLOAD not available")
-            f.state('uploader_status').update(f"UPLOAD is not available!", 'error')
         case c.EDIT:
             st.warning("EDIT not availabe")
         case c.MAP:
@@ -53,9 +56,13 @@ def on_change(key):
             st.warning("SPEED not available")
         case c.POST:
             st.warning("POST not available")
+        case c.RESET:
+            st.warning('Hold on to your butt!')
         # If an exact match is not confirmed, this last case will be used if provided
         case _:
             st.error("Something's wrong in on_change( )")
+    
+    return
 
 
 # init_state( )
@@ -67,6 +74,8 @@ def init_state( ):
         st.session_state.logger = logger
     if not f.state('uploader_key'): 
         st.session_state.uploader_key = 0   # initialzie file_uploader key so it can be easily reset
+    if not f.state('count'):                 
+        st.session_state.count = 0    # track the number of working files
 
     # UI containers
     if not f.state('uploader_status'):
@@ -75,8 +84,8 @@ def init_state( ):
         SB.StatusBox('working_status')  # Call the class constructor 
 
     # Unused for now
-    if not f.state('prepared'):
-        st.session_state.prepared = False 
+    # if not f.state('prepared'):
+    #     st.session_state.prepared = False 
     if not f.state('working_gpx'):
         st.session_state.working_gpx = None   # our current WorkingGPX object
     if not f.state('gpx_list'):
@@ -101,21 +110,26 @@ def init_state( ):
 
 # MAIN ---------------------------------------------------------
 
+# Present the Reset! button
+if st.button('Reset!', key='reset', icon='💣', help="Click here to restart from scratch!", use_container_width=True):
+    for key in st.session_state.keys( ):
+        del st.session_state[key]   # delete all session_state 
+    st.rerun( )
+
+# If there are no WorkingGPX objects, upload some now!
+if not f.state('count'):
+    u.uploader( )
+
 # Create the sidebar menu
 with st.sidebar:
-    selected = option_menu("GPX Track Workbench", [ c.HOME, c.UPLOAD, c.EDIT, c.MAP, c.SPEED, c.POST ], 
-    icons=['house-fill', 'cloud-upload-fill', 'pencil', 'map', 'speedometer', 'signpost-split'], 
-    menu_icon="cast", default_index=0, on_change=on_change, key='main_menu')  
+    selected = option_menu("GPX Track Workbench", [ '---', c.EDIT, c.MAP, c.SPEED, c.POST], 
+    icons=['', 'pencil', 'map', 'speedometer', 'signpost-split'], 
+    menu_icon="cast", on_change=on_change, key='main_menu')  
 
     # Initialize our state variables!
     init_state( )
 
-# # Test the ability to change 'uploader_status' using the state variable.  It works!
-# f.state('uploader_status').update("This text uses the 'uploader_status' state( ) variable.")
-# # Now, set the working_status text using the stored uploader_status text as an error
-# f.state('working_status').update(f.state('uploader_status').text, 'error')
-
-# Do some things in the main area
+# # Do some things in the main area
 st.write(selected)
 
 # # 3. CSS style definitions
