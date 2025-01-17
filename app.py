@@ -72,8 +72,6 @@ def init_state( ):
         logger.add("app.log", rotation="500 MB")
         logger.info('This is GPX-Track-Workbench/app.py!')
         st.session_state.logger = logger
-    if not f.state('uploader_key'): 
-        st.session_state.uploader_key = 0   # initialzie file_uploader key so it can be easily reset
     if not f.state('count'):                 
         st.session_state.count = 0    # track the number of working files
 

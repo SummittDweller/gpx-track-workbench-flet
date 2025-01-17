@@ -15,13 +15,21 @@ def uploader( ):
     if f.state('count'):
         return
 
-    # If we have no uploaded GPX... invoke file_uploader
-    with st.form(key=f"uploader_form_{f.state('uploader_key')}", clear_on_submit=True):
-        uploaded = st.file_uploader("Upload GPX Data", key=f"uploader_{f.state('uploader_key')}", 
+    # If we have no uploaded GPX... invoke file_uploader inside an st.form, inside an st.empty
+    # See https://discuss.streamlit.io/t/delete-remove-from-app-screen-streamlit-form-st-form-after-feeling/25041/2
+    placeholder = st.empty( )
+
+    # Invoke file_uploader
+    with placeholder.form(key=f"uploader_form", clear_on_submit=True):
+        uploaded = st.file_uploader("Upload GPX Data", key=f"file_uploader", 
             type=["gpx"], accept_multiple_files=True, 
             help='Drag GPX files here and/or "Browse files" and select.  Click "Submit and Clear Uploader" when finished.')
         submitted = st.form_submit_button("Submit and Clear Uploader")
     
+    # Once the form is submitted clear the placeholder
+    if submitted:
+        placeholder.empty( )
+
     # When the uploader form is submitted...  create WorkingGPX objects from the uploads
     up_count = len(uploaded)
     if uploaded is not None and up_count > 0:
