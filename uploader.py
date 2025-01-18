@@ -70,7 +70,7 @@ def prep_uploaded(st, uploaded):
 
         count = f.state('count')
         if count:
-            msg = f"Successfully created {'count'} WorkingGPX {p.plural('object', count)}"
+            msg = f"Successfully created {count} WorkingGPX {p.plural('object', count)}"
             f.state('working_status').update(msg, 'success')
 
         # else:

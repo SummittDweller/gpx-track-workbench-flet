@@ -19,6 +19,7 @@ import pandas as pd
 from io import BytesIO
 import pprint
 
+
 # print_state(st, line=False)
 # Pretty print the session_state IF that option is on
 # --------------------------------------------------------------------------------
@@ -72,42 +73,10 @@ def display_gpx(st):
     state('logger').info(msg)
 
 
-# edit_df(st) - Load and edit the 'working_path' dataframe of GPX data
-# --------------------------------------------------------------------
-def edit_df(st):
-    wp = state('working_path')
-    msg = f"edit_df(st) has been called for '{wp}'!"
-    # st.write(msg)
-    state('logger').info(msg)
 
-    if wp:
-        msg = f"To remove track points select one or more rows on the left then use the trashcan icon to remove them."
-        st.write(msg)
-    
-        # Load the working_path GPX to our dataframe.
-        (df, gpx) = load_working_to_dataframe(st, wp)
-        # st.dataframe(df)
-
-        # Display the associated dataframe w/ edit capability
-        rows = int(df.size / 5)
-        st.write(f"Loaded {rows} rows of data from '{wp}'...")
-
-        # Edit the dataframe
-        new_df = st.data_editor(df, num_rows='dynamic', key='editor')
-
-        # Present a button below the dataframe that can be used to save the updated 
-        # dataframe back to the working_path file.
-        result = save_working_copy(st, new_df)
-    else:
-        st.error(f"GPX dataframe is NOT loaded!")
-        return False
-
-
-
-# make_gpx_from_dataframe(df) - Return a gpxpy GPX structure from a dataframe
+# dataframe_to_gpx - Return a gpxpy GPX structure from a WorkingGPX dataframe
 # ------------------------------------------------------------------------
-def make_gpx_from_dataframe(df):
-  
+def dataframe_to_gpx(df):
     # Convert DataFrame to GPX format
     gpx = gpxpy.gpx.GPX( )
     track = gpxpy.gpx.GPXTrack( )
@@ -127,7 +96,7 @@ def make_gpx_from_dataframe(df):
 # --------------------------------------------------------------------
 def save_working_copy(st, df):
     if st.button("Save the Working Copy of Changes Made", icon="💥", help=f"Click to save a working copy of your GPX changes"):
-        gpx = make_gpx_from_dataframe(df)
+        gpx = dataframe_to_gpx(df)
         wp = state('working_path')    
 
         # Write the temporary GPX file
@@ -157,48 +126,27 @@ def reload(st):
         return False
 
 
-# load_working_to_dataframe(st, working_path) - Load the working copy of a GPX to our dataframe
-#   and return the dataframe and gpxpy GPX object
+# # load_working(st, working) - Load a selected WorkingGPX object to
+# #   our dataframe and return the dataframe and gpxpy GPX object
+# # ---------------------------------------------------------------------------------
+# def load_working(st, workingGPX):
+#     gpx = False
+#     working_path = workingGPX.fullname
+#     try:
+#         with open(working_path) as w:
+#             gpx_contents = w.read( )
+#             gpx = gpxpy.parse(gpx_contents)
+#     except Exception as e:
+#         st.exception(f"Exception: {e}")
+#         return False
+#     df = gpx_to_dataframe(st, gpx, working_path)
+#     return (df, gpx)
+
+
+# gpx_to_dataframe(st, gpx, name) - Load a GPX structure into a dataframe
+#   and return the dataframe
 # ---------------------------------------------------------------------------------
-def load_working_to_dataframe(st, working_path):
-    gpx = False
-
-    try:
-        with open(working_path) as w:
-            gpx_contents = w.read( )
-            gpx = gpxpy.parse(gpx_contents)
-    except Exception as e:
-        st.exception(f"Exception: {e}")
-        return False
-    
-    (df, gpx) = load_to_dataframe(st, gpx, working_path)
-
-    return (df, gpx)
-
-
-# load_uploaded_to_dataframe(st, uploaded) - Load a GPX upload into our dataframe
-#   and return the serialized dataframe and GPX
-# ---------------------------------------------------------------------------------
-def load_uploaded_to_dataframe(st, uploaded):
-    gpx = False
-    
-    try:
-        gpx_contents = uploaded.read( )
-        gpx_file = BytesIO(gpx_contents)
-        gpx = gpxpy.parse(gpx_file)
-    except Exception as e:
-        st.exception(f"Exception: {e}")
-        return False
-
-    (df, gpx) = load_to_dataframe(st, gpx, uploaded.name)
-
-    return (df, gpx)
-
-    
-# load_to_dataframe(st, gpx, name) - Load a GPX structure into our dataframe
-#   and return the serialized dataframe and GPX
-# ---------------------------------------------------------------------------------
-def load_to_dataframe(st, gpx, name):
+def gpx_to_dataframe(st, gpx, name):
     route_info = []
 
     for track in gpx.tracks:
@@ -222,17 +170,31 @@ def load_to_dataframe(st, gpx, name):
 
     # Create a dataframe from the route_info
     df = pd.DataFrame(route_info)
-    # df = serialize_dataframe(st, dataframe, name)               # NO longer part of session_state, no reason to serialize!
     msg = f"Route info from {name} is now in our dataframe!"
     state('logger').info(msg)
-    # st.write(msg)
 
     # Get track center lifted from https://www.google.com/search?client=firefox-b-1-d&q=python+gpx+track+center
     # st.session_state.center = get_track_center(gpx)
 
+    return df
+
+
+# uploaded_to_working(st, uploaded) - Create WorkingGPX dataframe and GPX elements 
+#   from a GPX upload
+# ---------------------------------------------------------------------------------
+def uploaded_to_working(st, uploaded):
+    gpx = False
+    try:
+        gpx_contents = uploaded.read( )
+        gpx_file = BytesIO(gpx_contents)
+        gpx = gpxpy.parse(gpx_file)
+    except Exception as e:
+        st.exception(f"Exception: {e}")
+        return False
+    df = gpx_to_dataframe(st, gpx, uploaded.name)
     return (df, gpx)
 
-
+    
 # save_temp_gpx(st, gpx) - The load functions above returns a serailized dataframe object and GPX,
 #   save a TEMP copy of the GPX.
 # ------------------------------------------------------------------------------

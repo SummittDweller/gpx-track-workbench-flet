@@ -5,7 +5,8 @@
 # uploader_status - A StatusBox object in the sidebar just below the menu
 # working_status - A StatusBox object in the sidebar below the uploader_status container
 # count - Number of loaded WorkingGPX objects to choose from
-# uploader_key - Used for proper function of the file_uploader
+# gpx_list - dict( ) of count WorkingGPX objects with key=WorkingGPX.alias, the name of the uploaded object it was created from
+# loaded - The selected/loaded WorkingGPX(s) for Edit, Map, Speed and Post actions
 
 # Test the ability to change 'uploader_status' using the state variable.  It works!
 #   f.state('uploader_status').update("This text uses the 'uploader_status' state( ) variable.")
@@ -16,6 +17,10 @@
 import constants as c
 import functions as f
 import uploader as u
+import selector as select
+import editor as e
+import map as m
+
 # import map as m
 # import speed as s
 
@@ -39,30 +44,37 @@ import inflect
 # from io import BytesIO
 
 
-# on_change(key) - Define the menu's on_change callback
-# ------------------------------------------------------------------------------------------
-def on_change(key):
-    selection = st.session_state[key]
-    # st.success(f"Selection changed to: {selection}")
-    # st.session_state
+# # on_change(key) - Define the menu's on_change callback
+# # ------------------------------------------------------------------------------------------
+# def on_change(key):
+#     selection = st.session_state[key]
+#     # st.success(f"Selection changed to: {selection}")
+#     # st.session_state
 
-    # Act on the selected key
-    match selection:
-        case c.EDIT:
-            st.warning("EDIT not availabe")
-        case c.MAP:
-            st.warning("MAP not available")
-        case c.SPEED:
-            st.warning("SPEED not available")
-        case c.POST:
-            st.warning("POST not available")
-        case c.RESET:
-            st.warning('Hold on to your butt!')
-        # If an exact match is not confirmed, this last case will be used if provided
-        case _:
-            st.error("Something's wrong in on_change( )")
+#     # Act on the selected key
+#     match selection:
+#         case c.EDIT:
+#             if not f.state('loaded'):
+#                 st.session_state.loaded = select.pick_one(st)
+            
+#             loaded = f.state('loaded')
+#             if loaded:
+#                 f.state('working_status').update(f"{loaded.name} loaded for {selection}")
+#                 f.edit_df(st)
+
+#         case c.MAP:
+#             st.warning("MAP not available")
+#         case c.SPEED:
+#             st.warning("SPEED not available")
+#         case c.POST:
+#             st.warning("POST not available")
+#         case c.RESET:
+#             st.warning('Hold on to your butt!')
+#         # If an exact match is not confirmed, this last case will be used if provided
+#         case _:
+#             st.error("Something's wrong in on_change( )")
     
-    return
+#     return
 
 
 # init_state( )
@@ -74,6 +86,8 @@ def init_state( ):
         st.session_state.logger = logger
     if not f.state('count'):                 
         st.session_state.count = 0    # track the number of working files
+    if not f.state('loaded'):                 
+        st.session_state.loaded = None    # WorkingGPX object(s) loaded for processing
 
     # UI containers
     if not f.state('uploader_status'):
@@ -109,7 +123,8 @@ def init_state( ):
 # MAIN ---------------------------------------------------------
 
 # Present the Reset! button
-if st.button('Reset!', key='reset', icon='💣', help="Click here to restart from scratch!", use_container_width=True):
+reset = st.empty( )
+if reset.button('Reset!', key='reset', icon='💣', help="Click here to restart from scratch!", use_container_width=True):
     for key in st.session_state.keys( ):
         del st.session_state[key]   # delete all session_state 
     st.rerun( )
@@ -122,13 +137,44 @@ if not f.state('count'):
 with st.sidebar:
     selected = option_menu("GPX Track Workbench", [ '---', c.EDIT, c.MAP, c.SPEED, c.POST], 
     icons=['', 'pencil', 'map', 'speedometer', 'signpost-split'], 
-    menu_icon="cast", on_change=on_change, key='main_menu')  
+    menu_icon="cast", key='main_menu', default_index=0)  # , on_change=on_change  
 
     # Initialize our state variables!
     init_state( )
 
-# # Do some things in the main area
-st.write(selected)
+# Do some things in the main area
+selected = f.state('main_menu')
+if selected:
+    st.write(selected)
+
+    # Take action!  Replaces the on_change( ) function...
+    match selected:
+        case '---':
+            st.write('Select an action from the Main Menu')
+        case c.EDIT:
+            if not f.state('loaded'):
+                st.session_state.loaded = select.pick_one(st)
+                loaded = f.state('loaded')
+                if loaded:
+                    f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
+                    e.edit_df(st)
+        case c.MAP:
+            if not f.state('loaded'):
+                st.session_state.loaded = select.pick_one(st)
+                loaded = f.state('loaded')
+                if loaded:
+                    f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
+                    m.map_gpx(st)
+        case c.SPEED:
+            st.warning("SPEED not available")
+        case c.POST:
+            st.warning("POST not available")
+        case c.RESET:
+            st.warning('Hold on to your butt!')
+        # If an exact match is not confirmed, this last case will be used if provided
+        case _:
+            st.error("Something's wrong in on_change( )")
+
 
 # # 3. CSS style definitions
 # selected3 = option_menu(None, ["Home", "Upload",  "Tasks", 'Settings'], 

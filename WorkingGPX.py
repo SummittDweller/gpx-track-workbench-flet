@@ -1,4 +1,4 @@
-# Create the WorkingGPX and WGPXList classes 
+# Create the WorkingGPX and GPXList classes 
 
 import streamlit as st
 import functions as f
@@ -20,7 +20,7 @@ class WorkingGPX(object):
         # If source type is a Streamlit UploadedFile object...
         if t == st.runtime.uploaded_file_manager.UploadedFile:
             self.alias = source.name
-            (df, gpx) = f.load_uploaded_to_dataframe(st, source)
+            (df, gpx) = f.uploaded_to_working(st, source)
             if df.info and gpx:
                 self.df = df
                 self.gpx = gpx
@@ -34,11 +34,16 @@ class WorkingGPX(object):
             self.status = "Unknown 'source' type in Constructor"
 
     
-    # Method
-    def add_radius(self, r):
-        self.radius = self.radius + r
-        return(self.radius)
-    
+    # Methods
+    def update_from_df(self, df):
+        self.df = df
+        g = self.gpx = f.dataframe_to_gpx(df)
+        with open(self.fullname, 'w') as wf:
+            wf.write(g.to_xml( ))
+        msg = f"WorkingGPX.update_from_df( ) has updated object '{self.alias}' as '{self.fullname}'."
+        f.state('logger').info(msg)
+        return self
+
 
 class GPXList( ):
     
