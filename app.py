@@ -21,6 +21,7 @@ import selector as select
 import editor as e
 import map as m
 import speed as s
+import traceback as tb
 
 # import map as m
 # import speed as s
@@ -43,6 +44,8 @@ import inflect
 # import gpxpy
 # import pandas as pd
 # from io import BytesIO
+
+
 
 
 # # on_change(key) - Define the menu's on_change callback
@@ -82,9 +85,10 @@ import inflect
 # Initialize all of the st.session_state values
 def init_state( ):
     if not f.state('logger'):
-        logger.add("app.log", rotation="500 MB")
+        logger.add("app.log", rotation="500 MB", level='TRACE')    # Change this to DEBUG to turn off TRACE
         logger.info('This is GPX-Track-Workbench/app.py!')
         st.session_state.logger = logger
+    f.trace( )
     if not f.state('count'):                 
         st.session_state.count = 0    # track the number of working files
     if not f.state('loaded'):                 
@@ -92,15 +96,8 @@ def init_state( ):
     if not f.state('GPXdict'):
         st.session_state.GPXdict = None   # session_state list of WorkingGPX objects in a GPXList object
 
-    # UI containers
-    if not f.state('uploader_status'):
-        SB.StatusBox('uploader_status')  # Call the class constructor 
-    if not f.state('working_status'):
-        SB.StatusBox('working_status')  # Call the class constructor 
-
     # Unused for now
-    # if not f.state('prepared'):
-    #     st.session_state.prepared = False 
+    f.trace( )
     if not f.state('working_gpx'):
         st.session_state.working_gpx = None   # our current WorkingGPX object
     if not f.state('index'):                 
@@ -119,38 +116,60 @@ def init_state( ):
         st.session_state.mph_limit = c.SPEED_THRESHOLD    # default walking speed threshold for trim
 
 
+def init_sidebar( ):
+    # UI containers
+    f.trace( )
+    if not f.state('uploader_status'):
+        SB.StatusBox('uploader_status')  # Call the class constructor 
+    if not f.state('working_status'):
+        SB.StatusBox('working_status')  # Call the class constructor 
+
+
 # MAIN ---------------------------------------------------------
+
+# Initialize our state variables!  Make sure the logger is initialized!
+init_state( )
 
 # Present the Reset! button
 reset = st.empty( )
+f.trace( )
+
 if reset.button('Reset!', key='reset', icon='💣', help="Click here to restart from scratch!", use_container_width=True):
     for key in st.session_state.keys( ):
         del st.session_state[key]   # delete all session_state 
     st.rerun( )
+    f.trace( )
 
 # If there are no WorkingGPX objects, upload some now!
 if not f.state('count'):
+    f.trace( )
     u.uploader( )
+    f.trace( )
 
 # Create the sidebar menu
 with st.sidebar:
     selected = option_menu("GPX Track Workbench", [ '---', c.EDIT, c.MAP, c.SPEED, c.POST], 
     icons=['', 'pencil', 'map', 'speedometer', 'signpost-split'], 
     menu_icon="cast", key='main_menu', default_index=0)  # , on_change=on_change  
+    f.trace( )
 
     # Initialize our state variables!
-    init_state( )
+    init_sidebar( )
+    f.trace( )
 
 # Do some things in the main area
 selected = f.state('main_menu')
 if selected:
     st.write(selected)
+    f.trace( )
 
     # Take action!  Replaces the on_change( ) function...
     match selected:
         case '---':
+            f.trace( )
             st.write('Select an action from the Main Menu')
         case c.EDIT:
+            f.trace( )
             if not f.state('loaded'):
                 st.session_state.loaded = select.pick_one(st)
                 loaded = f.state('loaded')
@@ -158,6 +177,7 @@ if selected:
                     f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
                     e.edit_df(st)
         case c.MAP:
+            f.trace( )
             if not f.state('loaded'):
                 st.session_state.loaded = select.pick_one(st)
                 loaded = f.state('loaded')
@@ -165,6 +185,7 @@ if selected:
                     f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
                     m.map_gpx(st)
         case c.SPEED:
+            f.trace( )
             if not f.state('loaded'):
                 st.session_state.loaded = select.pick_one(st)
                 loaded = f.state('loaded')
@@ -172,18 +193,26 @@ if selected:
                     f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
                     s.speed_gpx(st)
         case c.POST:
+            f.trace( )
             st.warning("POST not available")
         case c.RESET:
+            f.trace( )
             st.warning('Hold on to your butt!')
         # If an exact match is not confirmed, this last case will be used if provided
         case _:
+            f.trace( )
             st.error("Something's wrong in on_change( )")
 
 # Print the GPXList dict of WG objects
+f.trace( )
 gpx_dict = f.state('GPXdict')
 if gpx_dict: 
     gpx_dict.print_GPXdict(st)
 
+f.trace( )
+
+# Menu options and examples
+#
 # # 3. CSS style definitions
 # selected3 = option_menu(None, ["Home", "Upload",  "Tasks", 'Settings'], 
 #     icons=['house', 'cloud-upload', "list-task", 'gear'], 
@@ -195,15 +224,10 @@ if gpx_dict:
 #         "nav-link-selected": {"background-color": "green"},
 #     }
 # )
-
+#
 # # 4. Manual item selection
 # if st.session_state.get('switch_button', False):
 #     st.session_state['menu_option'] = (st.session_state.get('menu_option', 0) + 1) % 4
 #     manual_select = st.session_state['menu_option']
 # else:
 #     manual_select = None
-    
-
-
-    
-    

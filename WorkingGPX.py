@@ -3,6 +3,7 @@
 import streamlit as st
 import functions as f
 import gpxpy
+import pandas as pd
 
 # get_track_center - Calculate map center (lat, lon) from a gpxpy track object
 # --------------------------------------------------------------------------------
@@ -18,6 +19,9 @@ def get_track_center(gpx):
     center_lon = sum(lons) / len(lons)
     return center_lat, center_lon
 
+
+# WorkingGPX Class
+# ==============================================================================
 
 class WorkingGPX(object):
     
@@ -65,7 +69,7 @@ class WorkingGPX(object):
         f.state('logger').info(msg)
         # Store the new object in our GPXdict
         d = f.state('GPXdict')
-        d[self.alias] = self
+        d.update(self)
         st.session_state.GPXdict = d
         return self
 
@@ -81,7 +85,7 @@ class WorkingGPX(object):
             st.exception(f"Exception: {e}")
             return False
         df = f.gpx_to_dataframe(st, gpx)
-        if df and gpx:
+        if isinstance(df, pd.DataFrame) and gpx:
             self.fullname = fullname
             self.df = df
             self.gpx = gpx
@@ -89,7 +93,7 @@ class WorkingGPX(object):
             self.status = "Updated from GPX file {fullname}"
             # Store the new object in our GPXdict
             d = f.state('GPXdict')
-            d[self.alias] = self
+            d.update(self)
             st.session_state.GPXdict = d
             return self
         else:
@@ -128,6 +132,9 @@ class WorkingGPX(object):
         return self
 
 
+# GPXList Class
+# ==============================================================================
+
 class GPXList( ):
     
     # Constructor
@@ -137,11 +144,19 @@ class GPXList( ):
     # Methods
     # --------------------------------------------------------------------
 
+
+    def update(self, object):
+        self.list[object.alias] = object
+        count = len(self.list)
+        return count
+
+
     def append(self, object):
         self.list[object.alias] = object
         count = len(self.list)
         return count
-    
+
+
     # print_GPXdict(st) - Print datafraes of all gox_list objects
     # ------------------------------------------------------------------------------------
     def print_GPXdict(self, st):

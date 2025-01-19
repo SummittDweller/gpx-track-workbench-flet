@@ -12,10 +12,20 @@ import inflect
 # Select and return ONE WorkingGPX object from our GPXList
 # ------------------------------------------------------------------------
 def pick_one(st):
-    if not f.state('count'):
+    count = f.state('count')
+    if not count: 
         st.session_state.loaded = None
         return None
 
+    # IF there is ONLY one GPX available, set our session_state and return it ASAP!
+    if count == 1:
+        gDict = f.state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
+        first_key = list(gDict.list.keys( ))[0]
+        loaded = gDict.list[first_key]
+        st.session_state.loaded = loaded
+        return loaded
+
+    # Fetch the current "loaded" object, if any
     loaded = f.state('loaded')
 
     # Build our options list... names of the uploaded GPX 

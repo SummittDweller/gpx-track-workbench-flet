@@ -18,6 +18,19 @@ import gpxpy
 import pandas as pd
 from io import BytesIO
 import pprint
+import traceback as tb
+
+
+# trace( ) 
+# Simple function to print a short traceback message into our log, if it exists
+# --------------------------------------------------------------------------------
+def trace( ):
+    logger = state('logger')
+    if logger: 
+        # tb.print_stack( )
+        msg0 = tb.format_stack()[8].strip()  # print the caller info, not this function!
+        msg = msg0.replace('File', 'trace:', 1).replace(', in <module>\n    f.trace( )', '')
+        logger.trace(msg)
 
 
 # print_state(st, line=False)
@@ -71,7 +84,6 @@ def display_gpx(st):
     msg = f"display_gpx( ) has been called!"
     st.write(msg)
     state('logger').info(msg)
-
 
 
 # dataframe_to_gpx - Return a gpxpy GPX structure from a WorkingGPX dataframe
@@ -189,7 +201,7 @@ def uploaded_to_working(st, uploaded):
     except Exception as e:
         st.exception(f"Exception: {e}")
         return False
-    df = gpx_to_dataframe(st, gpx, uploaded.name)
+    df = gpx_to_dataframe(st, gpx)
     return (df, gpx)
 
     
