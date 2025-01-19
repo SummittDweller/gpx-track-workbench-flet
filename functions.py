@@ -143,10 +143,10 @@ def reload(st):
 #     return (df, gpx)
 
 
-# gpx_to_dataframe(st, gpx, name) - Load a GPX structure into a dataframe
+# gpx_to_dataframe(st, gpx) - Load a GPX structure into a dataframe
 #   and return the dataframe
 # ---------------------------------------------------------------------------------
-def gpx_to_dataframe(st, gpx, name):
+def gpx_to_dataframe(st, gpx):
     route_info = []
 
     for track in gpx.tracks:
@@ -170,8 +170,6 @@ def gpx_to_dataframe(st, gpx, name):
 
     # Create a dataframe from the route_info
     df = pd.DataFrame(route_info)
-    msg = f"Route info from {name} is now in our dataframe!"
-    state('logger').info(msg)
 
     # Get track center lifted from https://www.google.com/search?client=firefox-b-1-d&q=python+gpx+track+center
     # st.session_state.center = get_track_center(gpx)

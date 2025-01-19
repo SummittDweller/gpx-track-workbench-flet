@@ -5,7 +5,7 @@
 # uploader_status - A StatusBox object in the sidebar just below the menu
 # working_status - A StatusBox object in the sidebar below the uploader_status container
 # count - Number of loaded WorkingGPX objects to choose from
-# gpx_list - dict( ) of count WorkingGPX objects with key=WorkingGPX.alias, the name of the uploaded object it was created from
+# GPXdict - dict( ) of count WorkingGPX objects with key=WorkingGPX.alias, the name of the uploaded object it was created from
 # loaded - The selected/loaded WorkingGPX(s) for Edit, Map, Speed and Post actions
 
 # Test the ability to change 'uploader_status' using the state variable.  It works!
@@ -20,6 +20,7 @@ import uploader as u
 import selector as select
 import editor as e
 import map as m
+import speed as s
 
 # import map as m
 # import speed as s
@@ -30,7 +31,7 @@ import streamlit as st
 from loguru import logger
 from streamlit_option_menu import option_menu
 # from st_click_detector import click_detector as did_click
-import WorkingGPX as wgpx
+import WorkingGPX as WG
 import StatusBox as SB
 # import pprint
 import time
@@ -88,6 +89,8 @@ def init_state( ):
         st.session_state.count = 0    # track the number of working files
     if not f.state('loaded'):                 
         st.session_state.loaded = None    # WorkingGPX object(s) loaded for processing
+    if not f.state('GPXdict'):
+        st.session_state.GPXdict = None   # session_state list of WorkingGPX objects in a GPXList object
 
     # UI containers
     if not f.state('uploader_status'):
@@ -100,10 +103,6 @@ def init_state( ):
     #     st.session_state.prepared = False 
     if not f.state('working_gpx'):
         st.session_state.working_gpx = None   # our current WorkingGPX object
-    if not f.state('gpx_list'):
-        st.session_state.gpx_list = None   # session_state list of WorkingGPX objects in a GPXList object
-    if not f.state('count'):                 
-        st.session_state.count = 0    # track the number of working files
     if not f.state('index'):                 
         st.session_state.index = False    # index to the current working file
     if not f.state('process'):
@@ -166,7 +165,12 @@ if selected:
                     f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
                     m.map_gpx(st)
         case c.SPEED:
-            st.warning("SPEED not available")
+            if not f.state('loaded'):
+                st.session_state.loaded = select.pick_one(st)
+                loaded = f.state('loaded')
+                if loaded:
+                    f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
+                    s.speed_gpx(st)
         case c.POST:
             st.warning("POST not available")
         case c.RESET:
@@ -175,6 +179,10 @@ if selected:
         case _:
             st.error("Something's wrong in on_change( )")
 
+# Print the GPXList dict of WG objects
+gpx_dict = f.state('GPXdict')
+if gpx_dict: 
+    gpx_dict.print_GPXdict(st)
 
 # # 3. CSS style definitions
 # selected3 = option_menu(None, ["Home", "Upload",  "Tasks", 'Settings'], 

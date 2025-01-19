@@ -36,7 +36,7 @@ def uploader( ):
         p = inflect.engine( )
         msg = (f"{up_count} GPX {p.plural('has', up_count)} been uploaded!")
         f.state('uploader_status').update(msg, 'success')
-        # Now prep the uploaded by creating a list of WorkingGPX objects
+        # Now prep the uploaded by creating a dict of WorkingGPX objects
         count = prep_uploaded(st, uploaded)
         st.session_state.count = count
         if count:
@@ -51,8 +51,8 @@ def prep_uploaded(st, uploaded):
     count = len(uploaded)
 
     # Create an empty GPXList    
-    gpxList = WG.GPXList( )
-    st.session_state.gpx_list = gpxList
+    GPXdict = WG.GPXList( )
+    st.session_state.GPXdict = GPXdict
  
     # Loop on the list of UploadedFile objects 
     for up in uploaded:
@@ -63,9 +63,9 @@ def prep_uploaded(st, uploaded):
         st.info(msg)
 
         # Add the new WorkingGPX object to our GPXList
-        count = gpxList.append(w)
+        count = GPXdict.append(w)
         st.session_state.count = count
-        st.session_state.gpx_list = gpxList
+        st.session_state.GPXdict = GPXdict
         # st.session_state.uploaded_list.append(w.alias)
 
         count = f.state('count')

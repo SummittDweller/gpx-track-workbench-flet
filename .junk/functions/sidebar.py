@@ -60,7 +60,7 @@ def sidebar(st):
 # Reset logic from https://discuss.streamlit.io/t/clear-the-file-uploader-after-using-the-file-data/66178/3
 # -------------------------------------------------------------------------------
 def clear_selection(st):
-    st.session_state.gpx_list = None
+    st.session_state.GPXdict = None
     st.session_state.index = False
     st.session_state.count = 0
     st.session_state.preparred = False      # set this so the working copies can be rebuilt from our uploads

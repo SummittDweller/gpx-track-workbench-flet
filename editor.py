@@ -45,10 +45,12 @@ def edit_df(st):
     
     # Once the form is submitted clear the placeholder and update the WorkingGPX.df 
     # with the new dataframe.  Update the loaded session_state and replace the updated WorkingGPX
-    # object into our session_state.gpx_list
+    # object into our session_state.GPXdict
     if submitted:
         placeholder.empty( )
         updated = loaded.update_from_df(new_df)
         st.session_state.loaded = updated
-        st.session_state.gpx_list[loaded.alias] = updated
+        st.session_state.GPXdict[loaded.alias] = updated
+
+
 

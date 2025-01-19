@@ -37,8 +37,8 @@ def init_state( ):
         st.session_state.prepared = False 
     if not state('working_gpx'):
         st.session_state.working_gpx = None   # our current WorkingGPX object
-    if not state('gpx_list'):
-        st.session_state.gpx_list = None   # session_state list of WorkingGPX objects in a GPXList object
+    if not state('GPXdict'):
+        st.session_state.GPXdict = None   # session_state list of WorkingGPX objects in a GPXList object
     if not state('count'):                 
         st.session_state.count = 0    # track the number of working files
     if not state('index'):                 
@@ -85,7 +85,7 @@ def pick_one(st):
     
     # Build our options list... names of the uploaded GPX 
     options = []
-    gList = state('gpx_list')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
+    gList = state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
     for key in gList.list:
         options.append(key)
 
@@ -144,7 +144,7 @@ def uploader(st):
 # Reset logic from https://discuss.streamlit.io/t/clear-the-file-uploader-after-using-the-file-data/66178/3
 # -------------------------------------------------------------------------------
 def reset(st):
-    st.session_state.gpx_list = None
+    st.session_state.GPXdict = None
     st.session_state.index = False
     st.session_state.count = 0
     st.session_state.preparred = False      # set this so the working copies can be rebuilt from our uploads
