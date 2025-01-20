@@ -88,7 +88,7 @@ def init_state( ):
         logger.add("app.log", rotation="500 MB", level='TRACE')    # Change this to DEBUG to turn off TRACE
         logger.info('This is GPX-Track-Workbench/app.py!')
         st.session_state.logger = logger
-    f.trace( )
+    f.trace(1)
     if not f.state('count'):                 
         st.session_state.count = 0    # track the number of working files
     if not f.state('loaded'):                 
@@ -97,7 +97,7 @@ def init_state( ):
         st.session_state.GPXdict = None   # session_state list of WorkingGPX objects in a GPXList object
 
     # Unused for now
-    f.trace( )
+    f.trace(1)
     if not f.state('working_gpx'):
         st.session_state.working_gpx = None   # our current WorkingGPX object
     if not f.state('index'):                 
@@ -118,7 +118,7 @@ def init_state( ):
 
 def init_sidebar( ):
     # UI containers
-    f.trace( )
+    f.trace(1)
     if not f.state('uploader_status'):
         SB.StatusBox('uploader_status')  # Call the class constructor 
     if not f.state('working_status'):
@@ -148,8 +148,8 @@ if not f.state('count'):
 
 # Create the sidebar menu
 with st.sidebar:
-    selected = option_menu("GPX Track Workbench", [ '---', c.EDIT, c.MAP, c.SPEED, c.POST], 
-    icons=['', 'pencil', 'map', 'speedometer', 'signpost-split'], 
+    selected = option_menu("GPX Track Workbench", [ '---', c.SELECT, '---', c.EDIT, c.MAP, c.SPEED, c.TRIM, c.POST], 
+    icons=['', 'eyedropper', '', 'pencil', 'map', 'speedometer', 'scissors', 'signpost-split'], 
     menu_icon="cast", key='main_menu', default_index=0)  # , on_change=on_change  
     f.trace( )
 
@@ -163,51 +163,75 @@ if selected:
     st.write(selected)
     f.trace( )
 
+    # Fetch what's loaded... at least one GPX
+    loaded = f.state('loaded')
+
     # Take action!  Replaces the on_change( ) function...
     match selected:
+
         case '---':
-            f.trace( )
             st.write('Select an action from the Main Menu')
+            f.trace( )
+        
+        case c.SELECT:
+            f.trace( )
+            st.session_state.loaded = select.pick_some(st)
+            f.trace( )
+        
         case c.EDIT:
+            loaded = select.check_loaded(st, 1)
             f.trace( )
-            if not f.state('loaded'):
-                st.session_state.loaded = select.pick_one(st)
-                loaded = f.state('loaded')
-                if loaded:
-                    f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
-                    e.edit_df(st)
+            loaded = f.state('loaded')
+            f.trace( )
+            if loaded:
+                e.edit_df(st)
+                f.trace( )
+        
         case c.MAP:
+            loaded = select.check_loaded(st, 1)
             f.trace( )
-            if not f.state('loaded'):
-                st.session_state.loaded = select.pick_one(st)
-                loaded = f.state('loaded')
-                if loaded:
-                    f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
-                    m.map_gpx(st)
+            loaded = f.state('loaded')
+            f.trace( )
+            if loaded:
+                m.map_gpx(st)
+                f.trace( )
+        
         case c.SPEED:
+            loaded = select.check_loaded(st)
             f.trace( )
-            if not f.state('loaded'):
-                st.session_state.loaded = select.pick_one(st)
-                loaded = f.state('loaded')
-                if loaded:
-                    f.state('working_status').update(f"{loaded.alias} loaded to '{selected}'")
-                    s.speed_gpx(st)
+            loaded = f.state('loaded')
+            f.trace( )
+            if loaded:
+                s.speed_gpx(st)
+                f.trace( )
+        
+        case c.TRIM:
+            loaded = select.check_loaded(st)
+            f.trace( )
+            loaded = f.state('loaded')
+            f.trace( )
+            if loaded:
+                s.trim_gpx(st)
+                f.trace( )
+        
         case c.POST:
-            f.trace( )
             st.warning("POST not available")
-        case c.RESET:
             f.trace( )
+        
+        case c.RESET:
             st.warning('Hold on to your butt!')
+            f.trace( )
+        
         # If an exact match is not confirmed, this last case will be used if provided
         case _:
-            f.trace( )
             st.error("Something's wrong in on_change( )")
+            f.trace( )
 
-# Print the GPXList dict of WG objects
-f.trace( )
-gpx_dict = f.state('GPXdict')
-if gpx_dict: 
-    gpx_dict.print_GPXdict(st)
+# # Print the GPXList dict of WG objects
+# f.trace( )
+# gpx_dict = f.state('GPXdict')
+# if gpx_dict: 
+#     gpx_dict.print_GPXdict(st)
 
 f.trace( )
 

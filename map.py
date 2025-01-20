@@ -22,13 +22,13 @@ import pprint
 # Define a function to load and display GPX route on the map
 def PyLoadRoutes(hex_color):
     loaded = f.state('loaded')
-    if not loaded:
+    if not loaded or len(loaded) < 1:
         return
         
     route_info = []
     all_coordinates = []
 
-    for track in loaded.gpx.tracks:
+    for track in loaded[0].gpx.tracks:
         for segment in track.segments:
             for point in segment.points:
                 route_info.append({
@@ -44,7 +44,7 @@ def PyLoadRoutes(hex_color):
     all_coordinates.append(new_coordinates)
 
     # Fetch the map center
-    (clat, clon) = loaded.center
+    (clat, clon) = loaded[0].center
     
     # Clear the existing map
     m = folium.Map(
@@ -57,7 +57,7 @@ def PyLoadRoutes(hex_color):
 
     # # Create separate polylines for each distinct sublist of coordinates
     for sublist in all_coordinates:
-        folium.PolyLine([coord[:2] for coord in sublist], weight=3, color=hex_color, tooltop=loaded.alias).add_to(m)
+        folium.PolyLine([coord[:2] for coord in sublist], weight=3, color=hex_color, tooltop=loaded[0].alias).add_to(m)
 
     # Display the updated Folium map
     st_folium(m, returned_objects=[])
@@ -69,7 +69,7 @@ def PyLoadRoutes(hex_color):
 # map_gpx(st)
 # -----------------------------------------------------------------------
 def map_gpx(st):
-    hex_color = st.sidebar.color_picker("Select Route Color", "#35BD07")  # Default to green
+    hex_color = st.sidebar.color_picker("Select Route Color", "#FF0000")  # Default to RED
 
     # # Initialize a global list to store coordinates and their respective file names
     # all_coordinates = []

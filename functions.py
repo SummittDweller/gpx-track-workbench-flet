@@ -21,14 +21,14 @@ import pprint
 import traceback as tb
 
 
-# trace( ) 
+# trace(offset=0) 
 # Simple function to print a short traceback message into our log, if it exists
 # --------------------------------------------------------------------------------
-def trace( ):
+def trace(offset=0):
     logger = state('logger')
     if logger: 
         # tb.print_stack( )
-        msg0 = tb.format_stack()[8].strip()  # print the caller info, not this function!
+        msg0 = tb.format_stack()[8+offset].strip()  # print the caller info, not this function!
         msg = msg0.replace('File', 'trace:', 1).replace(', in <module>\n    f.trace( )', '')
         logger.trace(msg)
 

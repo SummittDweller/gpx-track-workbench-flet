@@ -57,10 +57,49 @@ def speed_gpx(st):
         return
     
     # This is a file operation, so no dataframe or GPX file handling needed here.
-    msg = f"speed_gpx(st) called with '{loaded.alias}' as '{loaded.fullname}'"
+    num = len(loaded)
+    if num == 1:
+        msg = f"speed_gpx(st) called with '{loaded[0].alias}' as '{loaded[0].fullname}'"
+    else:
+        msg = f"speed_gpx(st) called with {num} loaded GPX"
     st.write(msg)
     f.state('logger').info(msg)
-    if gpsBabel_add_speed(st, loaded.fullname):
-        success = loaded.update_from_file(loaded.fullname)
-        return  
 
+    for index, g in enumerate(loaded):
+        if gpsBabel_add_speed(st, g.fullname):
+            g = g.update_from_file(g.fullname)
+
+    return
+
+
+# trim_gpx(st)
+# -----------------------------------------------------------------------
+def trim_gpx(st):
+    loaded = f.state('loaded')
+    if not loaded:
+        return
+    
+    # This is a dataframe operation, load them one at a time
+    num = len(loaded)
+    if num == 1:
+        msg = f"trim_gpx(st) called with '{loaded[0].alias}' as '{loaded[0].fullname}'"
+    else:
+        msg = f"trim_gpx(st) called with {num} loaded GPX"
+    st.write(msg)
+    f.state('logger').info(msg)
+
+    # Loop on the loaded GPX objects
+    for index, g in enumerate(loaded):
+        df = g.df
+        # Find the index of the first speed greater than 10
+        index = df['speed'].gt(10).idxmax()
+
+        # Drop rows where 'speed' is None, then zero, then greater than 5
+        # df.drop(df[df['speed'] == None].index, inplace=True)        
+        # df.drop(df[df['speed'] == 0].index, inplace=True)        
+        # df.drop(df[df['speed'] > 5].index, inplace=True)        
+
+        df = df.truncate(after=index)
+        g = g.update_from_df(df)
+
+    return

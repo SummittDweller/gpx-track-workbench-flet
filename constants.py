@@ -2,11 +2,12 @@
 
 APP_TITLE = 'GPX-Track-Workbench'
 
-HOME = "Home (Reset)"
+SELECT = "Select GPX Tracks"
 UPLOAD = 'Upload GPX Data'
-EDIT = 'Edit a GPX'
+EDIT = 'Edit a GPX Track'
 MAP = 'Map a GPX Track'
 SPEED = 'Add Speed Tags'
+TRIM = 'Trim Speed'
 POST = 'Post Tracks to Hikes'
 RESET = 'Reset!'
 
