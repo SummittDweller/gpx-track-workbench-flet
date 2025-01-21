@@ -22,9 +22,7 @@ import editor as e
 import map as m
 import speed as s
 import traceback as tb
-
-# import map as m
-# import speed as s
+import post as p
 
 # import os 
 # import shutil
@@ -153,9 +151,13 @@ with st.sidebar:
     menu_icon="cast", key='main_menu', default_index=0)  # , on_change=on_change  
     f.trace( )
 
-    # Initialize our state variables!
+    # Initialize our sidebar state variables!
     init_sidebar( )
     f.trace( )
+
+    # Display sidebar controls and status
+    f.state('uploader_status').display( )
+    f.state('working_status').display( )
 
 # Do some things in the main area
 selected = f.state('main_menu')
@@ -215,8 +217,13 @@ if selected:
                 f.trace( )
         
         case c.POST:
-            st.warning("POST not available")
+            loaded = select.check_loaded(st)
             f.trace( )
+            loaded = f.state('loaded')
+            f.trace( )
+            if loaded:
+                p.post_gpx(st)
+                f.trace( )
         
         case c.RESET:
             st.warning('Hold on to your butt!')
