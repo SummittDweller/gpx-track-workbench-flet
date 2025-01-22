@@ -139,14 +139,13 @@ def make_markdown(st, g):
     gpx_name = os.path.basename(g.fullname)
     md_name = gpx_name.replace('.gpx','.md')
 
-    title = g.title
     pubDate = '{}'.format(g.datetime.strftime('%Y-%m-%d'))
     pubTime = '{}:{}'.format(g.datetime.strftime('%H'), g.datetime.strftime('%M'))
 
     # Open the new .md file
     pubDate = '{}'.format(g.datetime.strftime('%Y-%m-%d'))
 
-    md_dir = c.CONTENT_HIKES_DIR + g.Ym
+    md_dir = c.CONTENT_HIKES_DIR + g.Ym + '/'
     try:
         os.mkdir(md_dir)
     except FileExistsError:
@@ -170,7 +169,7 @@ def make_markdown(st, g):
 
     # Write it line-by-line
     md_file.write("---\n")
-    md_file.write(f"title: {title}\n")
+    md_file.write(f"title: {g.title}\n")
     md_file.write(f"weight: {g.weight}\n")
     md_file.write(f"publishDate: {pubDate}\n")
     md_file.write(f"location: {g.city}\n")

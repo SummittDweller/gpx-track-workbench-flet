@@ -124,8 +124,12 @@ class WorkingGPX(object):
                 self.center = get_track_center(gpx)
                 self.datetime = dt = get_datetime(gpx)
                 self.city = identify_city(self.center[0], self.center[1])
+                if self.city:
+                    loc = f"in {self.city.replace(', Iowa', '')}"
+                else: 
+                    loc = ""
                 self.weather = get_weather(self.center[0], self.center[1], dt)
-                self.title = f"{self.mode} in {self.city} on {dt.strftime("%a %b %d")} at {dt.strftime("%-l%p")}"
+                self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {loc}"
                 self.weight = "-" + dt.strftime('%Y%m%d%H%M')
                 self.Ym = '{}'.format(dt.strftime('%Y')) + '/' + '{}'.format(dt.strftime('%m'))
                 self.status = "Constructed from UploadedFile"
