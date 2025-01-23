@@ -26,11 +26,11 @@ def check_loaded(st, limit=10):
     if len(loaded) == 1:
         msg = f"GPX object '{loaded[0].alias}' is loaded as '{loaded[0].fullname}' for processing."
         st.info(msg)
-        f.state('working_status').update(msg)
+        f.state('selection_status').update(msg)
     else:
         msg = f"{len(loaded)} GPX objects are loaded for processing."
         st.info(msg)
-        f.state('working_status').update(msg)
+        f.state('selection_status').update(msg)
     return True
 
 
@@ -128,13 +128,16 @@ def pick_some(st, limit=10):
                 if f.state(key):
                     st.session_state.loaded.append(gDict.list[opt])
 
-    st.write(st.session_state)
+    # Dump the session state if checkbox is checked.
+    if f.state('dump_state'):
+        st.write(st.session_state)
+
     loaded = f.state('loaded')
     num = len(loaded)
     if num == 1:
-        f.state('working_status').update(f"{loaded[0].alias} loaded with title '{loaded[0].title}'")
+        f.state('selection_status').update(f"{loaded[0].alias} loaded with title '{loaded[0].title}'")
     else:
-        f.state('working_status').update(f"{num} GPX have been loaded")
+        f.state('selection_status').update(f"{num} GPX have been loaded")
     placeholder.empty( )
 
     # Fetch the current "loaded" list and return it

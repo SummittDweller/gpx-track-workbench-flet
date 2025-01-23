@@ -53,8 +53,8 @@ def init_state( ):
         st.session_state.controls = None 
     if not state('uploaded_status'):
         st.session_state.uploaded_status = None 
-    if not state('working_status'):
-        st.session_state.working_status = None 
+    if not state('selection_status'):
+        st.session_state.selection_status = None 
     if not state('common'):
         st.session_state.common = None 
 
@@ -184,8 +184,8 @@ def reset(st):
         else: 
             st.warning(f"You have **NO** WorkingGPX objects")
 
-    st.session_state.working_status = st.sidebar.empty( )
-    with state('working_status'):
+    st.session_state.selection_status = st.sidebar.empty( )
+    with state('selection_status'):
         if state('working_gpx'):
             w = state('working_gpx')
             st.success(f"The selected WorkingGPX is: **'{w.alias}'**")
@@ -213,7 +213,7 @@ def reset(st):
             working_gpx = pick_one(st)
             st.session_state.working_gpx = working_gpx
             if state('working_gpx'):
-                state('working_status').success(f"The selected WorkingPGX is: **'{working_gpx.alias}'**")
+                state('selection_status').success(f"The selected WorkingPGX is: **'{working_gpx.alias}'**")
 
         # If we do have a working_gpx...
         if state('working_gpx'):

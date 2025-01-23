@@ -7,7 +7,7 @@
 # ----
 # Creates an st.empty( ) container in the sidebar.  StatusBox attributes .name, 
 # .text. and .container are popluated but the named box is not visible until 
-# .update( ) is called.
+# .update( ) or .display( ) is called.
 # 
 # update(msg, type='info')
 # ----
@@ -34,13 +34,16 @@ from loguru import logger
 class StatusBox(object):
     
     # Constructor
-    def __init__(self, box='status_box'):
+    def __init__(self, box='status_box', heading='This is a StatusBox!'):
         self.name = box
         self.mode = 'warning'
+        self.heading = heading
         self.text = f"{box}: Initialized"
         with st.sidebar:
             self.container = st.empty( )   # create a Streamlit st.empty( ) container in the sidebar                
-            self.container.warning(self.text)        # write our text in the container as a warning
+            with self.container:
+                st.write(self.heading)
+                st.warning(self.text)        # write our text in the container as a warning
         st.session_state[box] = self
         # If a logger is defined, repeat the warning there
         if st.session_state.logger:
@@ -52,6 +55,7 @@ class StatusBox(object):
         self.text = msg
         self.mode = type
         with self.container:
+            st.write(self.heading)
             match type:
                 case 'info': st.info(msg)
                 case 'success': st.success(msg)
@@ -74,6 +78,7 @@ class StatusBox(object):
         msg = self.text
         type = self.mode
         with self.container:
+            st.write(self.heading)
             match type:
                 case 'info': st.info(msg)
                 case 'success': st.success(msg)

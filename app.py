@@ -3,15 +3,15 @@
 # Key state( ) elements -----------------------------------------------
 #
 # uploader_status - A StatusBox object in the sidebar just below the menu
-# working_status - A StatusBox object in the sidebar below the uploader_status container
+# selection_status - A StatusBox object in the sidebar below the uploader_status container
 # count - Number of loaded WorkingGPX objects to choose from
 # GPXdict - dict( ) of count WorkingGPX objects with key=WorkingGPX.alias, the name of the uploaded object it was created from
 # loaded - The selected/loaded WorkingGPX(s) for Edit, Map, Speed and Post actions
 
 # Test the ability to change 'uploader_status' using the state variable.  It works!
 #   f.state('uploader_status').update("This text uses the 'uploader_status' state( ) variable.")
-# # Now, set the working_status text using the stored uploader_status text as an error
-#   f.state('working_status').update(f.state('uploader_status').text, 'error')
+# # Now, set the selection_status text using the stored uploader_status text as an error
+#   f.state('selection_status').update(f.state('uploader_status').text, 'error')
 
 
 import constants as c
@@ -61,7 +61,7 @@ import inflect
             
 #             loaded = f.state('loaded')
 #             if loaded:
-#                 f.state('working_status').update(f"{loaded.name} loaded for {selection}")
+#                 f.state('selection_status').update(f"{loaded.name} loaded for {selection}")
 #                 f.edit_df(st)
 
 #         case c.MAP:
@@ -93,6 +93,10 @@ def init_state( ):
         st.session_state.loaded = []   # WorkingGPX object(s) loaded for processing
     if not f.state('GPXdict'):
         st.session_state.GPXdict = None   # session_state list of WorkingGPX objects in a GPXList object
+    if not f.state('select_button'):
+        st.session_state.select_button = None
+    if not f.state('dump_state'):
+        st.session_state.dump_state = None
 
     # Unused for now
     f.trace(1)
@@ -115,125 +119,130 @@ def init_state( ):
 
 
 def init_sidebar( ):
-    # UI containers
-    f.trace(1)
-    if not f.state('uploader_status'):
-        SB.StatusBox('uploader_status')  # Call the class constructor 
-    if not f.state('working_status'):
-        SB.StatusBox('working_status')  # Call the class constructor 
+
+    with st.sidebar:
+        # Present the Reset! button
+        if st.button('Reset!', key='reset', icon='💣', help="Click here to restart from scratch!", use_container_width=True):
+            for key in st.session_state.keys( ):
+                del st.session_state[key]   # delete all session_state 
+            st.rerun( )
+        f.trace( )
+
+        # Other sidebar controls
+        st.session_state.select_button = st.sidebar.button("Select GPX", key='gpx_selector', icon='☑️', use_container_width=True)
+
+        # Checkbox controls
+        st.session_state.dump_state = st.checkbox(f"Debug: Print session_state")
+        st.session_state.select_button = None
+
+        # UI containers
+        f.trace(1)
+        if not f.state('uploader_status'):
+            SB.StatusBox('uploader_status', 'Uploader Status:')  # Call the class constructor 
+        if not f.state('selection_status'):
+            SB.StatusBox('selection_status', 'GPX Selection Status:')   # Call the class constructor 
 
 
 # MAIN ---------------------------------------------------------
 
+st.title("GPX Track Workbench")
+
 # Initialize our state variables!  Make sure the logger is initialized!
 init_state( )
 
-# Present the Reset! button
-reset = st.empty( )
-f.trace( )
+# Initialize our sidebar state variables!
+init_sidebar( )
 
-if reset.button('Reset!', key='reset', icon='💣', help="Click here to restart from scratch!", use_container_width=True):
-    for key in st.session_state.keys( ):
-        del st.session_state[key]   # delete all session_state 
-    st.rerun( )
-    f.trace( )
+# Display sidebar controls and status
+f.state('uploader_status').display( )
+f.state('selection_status').display( )
 
 # If there are no WorkingGPX objects, upload some now!
 if not f.state('count'):
-    f.trace( )
     u.uploader( )
-    f.trace( )
 
-# Create the sidebar menu
-with st.sidebar:
-    selected = option_menu("GPX Track Workbench", [ '---', c.SELECT, '---', c.EDIT, c.MAP, c.SPEED, c.TRIM, c.POST], 
-    icons=['', 'eyedropper', '', 'pencil', 'map', 'speedometer', 'scissors', 'signpost-split'], 
-    menu_icon="cast", key='main_menu', default_index=0)  # , on_change=on_change  
-    f.trace( )
+# Show the GPX selector in the main area if we have uploaded some GPX
+if st.session_state.count:
+    st.session_state.loaded = select.pick_some(st)
 
-    # Initialize our sidebar state variables!
-    init_sidebar( )
-    f.trace( )
-
-    # Display sidebar controls and status
-    f.state('uploader_status').display( )
-    f.state('working_status').display( )
-
-# Do some things in the main area
-selected = f.state('main_menu')
-if selected:
-    st.write(selected)
-    f.trace( )
-
-    # Fetch what's loaded... at least one GPX
-    loaded = f.state('loaded')
-
-    # Take action!  Replaces the on_change( ) function...
-    match selected:
-
-        case '---':
-            st.write('Select an action from the Main Menu')
+    # Create our main menu container 
+    if st.session_state.count:
+        menu = st.container( )
+        with menu:
+            st.session_state.main_menu_selection = option_menu("GPX Track Workbench", [ '---', c.EDIT, c.MAP, c.SPEED, c.TRIM, c.POST], 
+            icons=['', 'pencil', 'map', 'speedometer', 'scissors', 'signpost-split'], 
+            menu_icon="cast", key='main_menu', default_index=0)  # , on_change=on_change  
             f.trace( )
-        
-        case c.SELECT:
-            f.trace( )
-            st.session_state.loaded = []
-            st.session_state.loaded = select.pick_some(st)
-            f.trace( )
-        
-        case c.EDIT:
-            loaded = select.check_loaded(st, 1)
-            f.trace( )
-            loaded = f.state('loaded')
-            f.trace( )
-            if loaded:
-                e.edit_df(st)
+
+            # Do some things in the main area
+            selected = f.state('main_menu_selection')
+            if selected:
+                st.write(selected)
                 f.trace( )
+
+                # Fetch what's loaded... at least one GPX
+                loaded = f.state('loaded')
+
+                # Take action!  Replaces the on_change( ) function...
+                match selected:
+
+                    case '---':
+                        st.write('Select an action from the Main Menu')
+                        f.trace( )
         
-        case c.MAP:
-            loaded = select.check_loaded(st, 1)
-            f.trace( )
-            loaded = f.state('loaded')
-            f.trace( )
-            if loaded:
-                m.map_gpx(st)
-                f.trace( )
+                    case c.EDIT:
+                        loaded = select.check_loaded(st, 1)
+                        f.trace( )
+                        loaded = f.state('loaded')
+                        f.trace( )
+                        if loaded:
+                            e.edit_df(st)
+                            f.trace( )
         
-        case c.SPEED:
-            loaded = select.check_loaded(st)
-            f.trace( )
-            loaded = f.state('loaded')
-            f.trace( )
-            if loaded:
-                s.speed_gpx(st)
-                f.trace( )
+                    case c.MAP:
+                        loaded = select.check_loaded(st, 1)
+                        f.trace( )
+                        loaded = f.state('loaded')
+                        f.trace( )
+                        if loaded:
+                            m.map_gpx(st)
+                            f.trace( )
         
-        case c.TRIM:
-            loaded = select.check_loaded(st)
-            f.trace( )
-            loaded = f.state('loaded')
-            f.trace( )
-            if loaded:
-                s.trim_gpx(st)
-                f.trace( )
+                    case c.SPEED:
+                        loaded = select.check_loaded(st)
+                        f.trace( )
+                        loaded = f.state('loaded')
+                        f.trace( )
+                        if loaded:
+                            s.speed_gpx(st)
+                            f.trace( )
         
-        case c.POST:
-            loaded = select.check_loaded(st)
-            f.trace( )
-            loaded = f.state('loaded')
-            f.trace( )
-            if loaded:
-                p.post_gpx(st)
-                f.trace( )
-        
-        case c.RESET:
-            st.warning('Hold on to your butt!')
-            f.trace( )
-        
-        # If an exact match is not confirmed, this last case will be used if provided
-        case _:
-            st.error("Something's wrong in on_change( )")
-            f.trace( )
+                    case c.TRIM:
+                        loaded = select.check_loaded(st)
+                        f.trace( )
+                        loaded = f.state('loaded')
+                        f.trace( )
+                        if loaded:
+                            s.trim_gpx(st)
+                            f.trace( )
+                    
+                    case c.POST:
+                        loaded = select.check_loaded(st)
+                        f.trace( )
+                        loaded = f.state('loaded')
+                        f.trace( )
+                        if loaded:
+                            p.post_gpx(st)
+                            f.trace( )
+                    
+                    case c.RESET:
+                        st.warning('Hold on to your butt!')
+                        f.trace( )
+                    
+                    # If an exact match is not confirmed, this last case will be used if provided
+                    case _:
+                        st.error("Something's wrong in on_change( )")
+                        f.trace( )
 
 # # Print the GPXList dict of WG objects
 # f.trace( )
