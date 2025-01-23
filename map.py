@@ -57,7 +57,7 @@ def PyLoadRoutes(hex_color):
 
     # # Create separate polylines for each distinct sublist of coordinates
     for sublist in all_coordinates:
-        folium.PolyLine([coord[:2] for coord in sublist], weight=3, color=hex_color, tooltop=loaded[0].alias).add_to(m)
+        folium.PolyLine([coord[:2] for coord in sublist], weight=3, color=hex_color, tooltop=loaded[0].title).add_to(m)
 
     # Display the updated Folium map
     st_folium(m, returned_objects=[])

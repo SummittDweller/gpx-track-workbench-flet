@@ -5,8 +5,8 @@
 # uploader_status - A StatusBox object in the sidebar just below the menu
 # selection_status - A StatusBox object in the sidebar below the uploader_status container
 # count - Number of uploaded WorkingGPX objects to choose from
-# GPXdict - dict( ) of count WorkingGPX objects with key=WorkingGPX.alias, the name of the uploaded object it was created from
-# loaded - The selected/loaded WorkingGPX(s) for Edit, Map, Speed and Post actions
+# GPXdict - dict( ) of count WorkingGPX objects with key=WorkingGPX.title
+# loaded - dict( ) of selected/loaded WorkingGPX(s) for Edit, Map, Speed and Post actions
 
 # Test the ability to change 'uploader_status' using the state variable.  It works!
 #   f.state('uploader_status').update("This text uses the 'uploader_status' state( ) variable.")
@@ -128,19 +128,15 @@ def init_sidebar( ):
             st.rerun( )
         f.trace( )
 
-        # Other sidebar controls
-        st.session_state.select_button = st.sidebar.button("Select GPX", key='gpx_selector', icon='☑️', use_container_width=True)
-
-        # Checkbox controls
-        st.session_state.dump_state = st.checkbox(f"Debug: Print session_state")
-        st.session_state.select_button = None
-
         # UI containers
         f.trace(1)
         if not f.state('uploader_status'):
             SB.StatusBox('uploader_status', 'Uploader Status:')  # Call the class constructor 
         if not f.state('selection_status'):
             SB.StatusBox('selection_status', 'GPX Selection Status:')   # Call the class constructor 
+
+        # Checkbox controls
+        st.session_state.dump_state = st.checkbox(f"Debug: Print session_state")
 
 
 # MAIN ---------------------------------------------------------
@@ -161,8 +157,9 @@ f.state('selection_status').display( )
 if not f.state('count'):
     u.uploader( )
 
-if f.state('loaded'):
-    st.session_state.count = len(f.state('loaded'))
+loaded = f.state('loaded')
+if loaded:
+    st.session_state.count = len(loaded)
 
 # Show the GPX selector in the main area if we have uploaded some GPX
 if st.session_state.count:

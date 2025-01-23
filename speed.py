@@ -59,7 +59,7 @@ def speed_gpx(st):
     # This is a file operation, so no dataframe or GPX file handling needed here.
     num = len(loaded)
     if num == 1:
-        msg = f"speed_gpx(st) called with '{loaded[0].alias}' as '{loaded[0].fullname}'"
+        msg = f"speed_gpx(st) called with '{loaded[0].title}' as '{loaded[0].fullname}'"
     else:
         msg = f"speed_gpx(st) called with {num} loaded GPX"
     st.write(msg)
@@ -82,7 +82,7 @@ def trim_gpx(st):
     # This is a dataframe operation, load them one at a time
     num = len(loaded)
     if num == 1:
-        msg = f"trim_gpx(st) called with '{loaded[0].alias}' as '{loaded[0].fullname}'"
+        msg = f"trim_gpx(st) called with '{loaded[0].title}' as '{loaded[0].fullname}'"
     else:
         msg = f"trim_gpx(st) called with {num} loaded GPX"
     st.write(msg)

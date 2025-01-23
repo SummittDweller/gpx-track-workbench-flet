@@ -86,49 +86,35 @@ def pick_some(st, limit=10):
         st.session_state.loaded = []
         return None
 
-    # IF there is ONLY one GPX available, set our session_state and return it ASAP!
-    if count == 1:
-        gDict = f.state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
-        first_key = list(gDict.list.keys( ))[0]
-        loaded = gDict.list[first_key]
-        st.session_state.loaded = loaded
-        return loaded
-
     # Fetch the current "loaded" object, if any
     loaded = f.state('loaded')
 
     # Build our options list... names of the uploaded GPX 
     options = []
-    gDict = f.state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
+    gDict = f.state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .title elements
     for key in gDict.list:
         title = gDict.list[key].title
-        options.append(title)
-        # options.append(key)
+        if key != title:
+            st.error(f"Found errant GPXDict key '{key}' which does not match the object's title: '{title}'")
+        options.append(key)
 
-    # Open the WorkingGPX selector in an st.form( ) inside an st.empty( ) and clear once selected
-    placeholder = st.empty( )
+    # Open the WorkingGPX selector in an st.form( ) inside an st.expander( )
+    label = f"☑️ Choose one or more GPX (from {count} available) to load for processing"
+    placeholder = st.expander(label, expanded=False)
 
     # Invoke a CheckBoxArray to create st.session_state.loaded_X values where X is 0 through the number of options
-    label = f"🔄 Choose one or more GPX to load for processing"
     with placeholder.form(key=f"selector_form", clear_on_submit=True):
+    # with st.form(key=f"selector_form", clear_on_submit=True):
         cb_array = CheckBoxArray("loaded", st, checkboxes=options, num_cols=1, max_select=limit)
         submitted = st.form_submit_button("Submit")
 
-
-        # selections = st.multiselect(label, options)      # wait for a selection and return it
-        # selected = []
-        # for sel in selections:
-        #     selected.append(gDict.list[sel])
-        # st.session_state.loaded = selected
-        # submitted = st.form_submit_button("Submit")
-
-        # Once the form is submitted clear the placeholder
-        if submitted:
-            st.session_state.loaded = []
-            for i, opt in enumerate(options):
-                key = f'loaded_{i}' 
-                if f.state(key):
-                    st.session_state.loaded.append(gDict.list[opt])
+    # Once the form is submitted shrink the selector
+    if submitted:
+        st.session_state.loaded = []
+        for i, opt in enumerate(options):
+            key = f'loaded_{i}' 
+            if f.state(key):
+                st.session_state.loaded.append(gDict.list[opt])
 
     # Dump the session state if checkbox is checked.
     if f.state('dump_state'):
@@ -141,7 +127,7 @@ def pick_some(st, limit=10):
             f.state('selection_status').update(f"{loaded[0].alias} loaded with title '{loaded[0].title}'")
         else:
             f.state('selection_status').update(f"{num} GPX have been loaded")
-        placeholder.empty( )
+        # placeholder.empty( )
 
     # Fetch the current "loaded" list and return it
     loaded = f.state('loaded')

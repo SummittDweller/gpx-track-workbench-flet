@@ -234,7 +234,7 @@ def post_gpx(st):
     # This is a file operation, so no dataframe or GPX file handling needed here.
     num = len(loaded)
     if num == 1:
-        msg = f"post_gpx(st) called with '{loaded[0].alias}' as '{loaded[0].fullname}'"
+        msg = f"post_gpx(st) called with '{loaded[0].title}' as '{loaded[0].fullname}'"
     else:
         msg = f"post_gpx(st) called with {num} loaded GPX"
     st.write(msg)

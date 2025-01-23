@@ -157,7 +157,7 @@ class WorkingGPX(object):
         self.datetime = get_datetime(g)
         with open(self.fullname, 'w') as wf:
             wf.write(g.to_xml( ))
-        msg = f"WorkingGPX.update_from_df( ) has updated object '{self.alias}' as '{self.fullname}'."
+        msg = f"WorkingGPX.update_from_df( ) has updated object '{self.title}' as '{self.fullname}'."
         f.state('logger').info(msg)
         # Store the new object in our GPXdict
         d = f.state('GPXdict')
@@ -239,13 +239,13 @@ class GPXList( ):
 
 
     def update(self, object):
-        self.list[object.alias] = object
+        self.list[object.title] = object
         count = len(self.list)
         return count
 
 
     def append(self, object):
-        self.list[object.alias] = object
+        self.list[object.title] = object
         count = len(self.list)
         return count
 
