@@ -37,13 +37,13 @@ class StatusBox(object):
     def __init__(self, box='status_box', heading='This is a StatusBox!'):
         self.name = box
         self.mode = 'warning'
-        self.heading = heading
-        self.text = f"{box}: Initialized"
+        self.heading = f"**{heading}** \n"
+        self.text = f"Initialized"
         with st.sidebar:
             self.container = st.empty( )   # create a Streamlit st.empty( ) container in the sidebar                
             with self.container:
-                st.write(self.heading)
-                st.warning(self.text)        # write our text in the container as a warning
+                msg = f"{self.heading}{self.text}"
+                st.warning(msg)        # write our text in the container as a warning
         st.session_state[box] = self
         # If a logger is defined, repeat the warning there
         if st.session_state.logger:
@@ -55,7 +55,7 @@ class StatusBox(object):
         self.text = msg
         self.mode = type
         with self.container:
-            st.write(self.heading)
+            msg = f"{self.heading}{self.text}"
             match type:
                 case 'info': st.info(msg)
                 case 'success': st.success(msg)
@@ -78,7 +78,7 @@ class StatusBox(object):
         msg = self.text
         type = self.mode
         with self.container:
-            st.write(self.heading)
+            msg = f"{self.heading}{self.text}"
             match type:
                 case 'info': st.info(msg)
                 case 'success': st.success(msg)

@@ -4,7 +4,7 @@
 #
 # uploader_status - A StatusBox object in the sidebar just below the menu
 # selection_status - A StatusBox object in the sidebar below the uploader_status container
-# count - Number of loaded WorkingGPX objects to choose from
+# count - Number of uploaded WorkingGPX objects to choose from
 # GPXdict - dict( ) of count WorkingGPX objects with key=WorkingGPX.alias, the name of the uploaded object it was created from
 # loaded - The selected/loaded WorkingGPX(s) for Edit, Map, Speed and Post actions
 
@@ -161,6 +161,9 @@ f.state('selection_status').display( )
 if not f.state('count'):
     u.uploader( )
 
+if f.state('loaded'):
+    st.session_state.count = len(f.state('loaded'))
+
 # Show the GPX selector in the main area if we have uploaded some GPX
 if st.session_state.count:
     st.session_state.loaded = select.pick_some(st)
@@ -169,9 +172,9 @@ if st.session_state.count:
     if st.session_state.count:
         menu = st.container( )
         with menu:
-            st.session_state.main_menu_selection = option_menu("GPX Track Workbench", [ '---', c.EDIT, c.MAP, c.SPEED, c.TRIM, c.POST], 
+            st.session_state.main_menu_selection = option_menu("Main Menu", [ '---', c.EDIT, c.MAP, c.SPEED, c.TRIM, c.POST], 
             icons=['', 'pencil', 'map', 'speedometer', 'scissors', 'signpost-split'], 
-            menu_icon="cast", key='main_menu', default_index=0)  # , on_change=on_change  
+            menu_icon="", key='main_menu', default_index=0)  # , on_change=on_change  
             f.trace( )
 
             # Do some things in the main area

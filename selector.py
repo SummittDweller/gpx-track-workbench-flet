@@ -17,14 +17,14 @@ import inflect
 def check_loaded(st, limit=10):
     loaded = f.state('loaded')
     if not loaded or len(loaded) < 1:
-        msg = f"You must load/select at least ONE WorkingGPX object for processing!"
+        msg = f"Use the 'Select GPX' button in the sidebar to select at least ONE WorkingGPX object for processing!"
         st.error(msg)
         return False
     if len(loaded) > limit:
-        msg = f"You have loaded/selected more than the limit of {limit} WorkingGPX objects for processing.  Only the first, '{loaded[0].alias}', will be processed."
+        msg = f"You have selected {len(loaded)} WorkingGPX objects for processing but the limit is {limit}.  Only the first, '{loaded[0].title}', will be processed."
         st.warning(msg)
     if len(loaded) == 1:
-        msg = f"GPX object '{loaded[0].alias}' is loaded as '{loaded[0].fullname}' for processing."
+        msg = f"GPX object '{loaded[0].title}' is loaded as '{loaded[0].fullname}' for processing."
         st.info(msg)
         f.state('selection_status').update(msg)
     else:
@@ -101,7 +101,9 @@ def pick_some(st, limit=10):
     options = []
     gDict = f.state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
     for key in gDict.list:
-        options.append(key)
+        title = gDict.list[key].title
+        options.append(title)
+        # options.append(key)
 
     # Open the WorkingGPX selector in an st.form( ) inside an st.empty( ) and clear once selected
     placeholder = st.empty( )
@@ -133,12 +135,13 @@ def pick_some(st, limit=10):
         st.write(st.session_state)
 
     loaded = f.state('loaded')
-    num = len(loaded)
-    if num == 1:
-        f.state('selection_status').update(f"{loaded[0].alias} loaded with title '{loaded[0].title}'")
-    else:
-        f.state('selection_status').update(f"{num} GPX have been loaded")
-    placeholder.empty( )
+    if loaded:
+        num = len(loaded)
+        if num == 1:
+            f.state('selection_status').update(f"{loaded[0].alias} loaded with title '{loaded[0].title}'")
+        else:
+            f.state('selection_status').update(f"{num} GPX have been loaded")
+        placeholder.empty( )
 
     # Fetch the current "loaded" list and return it
     loaded = f.state('loaded')
