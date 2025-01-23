@@ -2,12 +2,13 @@
 
 import streamlit as st
 import functions as f
+import constants as c
 import gpxpy
 import pandas as pd
 from datetime import datetime
 import os
 import time
-import datetime
+import json
 import requests
 from geopy.geocoders import Nominatim
 
@@ -47,9 +48,13 @@ def get_weather(lat, lon, dt):
         unix_time = int(time.mktime(dt.timetuple()))
         api_key = os.environ.get("OPEN_WEATHER_KEY", "Key Not Found!")
         api_url = c.OPEN_WEATHER_CALL.format(lat, lon, unix_time, api_key)
-        response = requests.get(api_url)
-        # print(response.json( ))
-        return response
+        # response = requests.get(api_url)
+        # if response:
+        #     weather = json.loads(response.text)
+        #     d = weather['data'][0]
+        #     w = d['weather'][0]
+        #     return f"{w['main']} and {d['temp']}&deg;F (wind chill={d['feels_like']}) with {d['humidity']}% humidity and winds at {d['wind_speed']} mph."
+        return f"Bogus clouds and -20&deg;F (wind chill=-30) with 200% humidity and winds at 20 mph."
     except Exception as e:
         print(f"Exception: {e}")
     return False

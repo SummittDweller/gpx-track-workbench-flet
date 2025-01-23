@@ -147,7 +147,7 @@ def make_markdown(st, g):
 
     md_dir = c.CONTENT_HIKES_DIR + g.Ym + '/'
     try:
-        os.mkdir(md_dir)
+        os.makedirs(md_dir, exist_ok=True)
     except FileExistsError:
         pass
     except Exception as e:
@@ -204,7 +204,7 @@ def add_track_to_markdown(st, g, md_file):
         gpx_dir = c.STATIC_GPX_DIR + g.Ym + '/'
 
         try:
-            os.mkdir(gpx_dir)
+            os.makedirs(gpx_dir, exist_ok=True)
         except FileExistsError:
             pass
         except Exception as e:

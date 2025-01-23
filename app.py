@@ -90,7 +90,7 @@ def init_state( ):
     if not f.state('count'):                 
         st.session_state.count = 0    # track the number of working files
     if not f.state('loaded'):                 
-        st.session_state.loaded = None    # WorkingGPX object(s) loaded for processing
+        st.session_state.loaded = []   # WorkingGPX object(s) loaded for processing
     if not f.state('GPXdict'):
         st.session_state.GPXdict = None   # session_state list of WorkingGPX objects in a GPXList object
 
@@ -177,6 +177,7 @@ if selected:
         
         case c.SELECT:
             f.trace( )
+            st.session_state.loaded = []
             st.session_state.loaded = select.pick_some(st)
             f.trace( )
         

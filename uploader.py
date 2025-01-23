@@ -53,9 +53,13 @@ def prep_uploaded(st, uploaded):
     # Create an empty GPXList    
     GPXdict = WG.GPXList( )
     st.session_state.GPXdict = GPXdict
+
+    progress_text = "Upload and WorkingGPX creation in progress. Please wait."
+    my_bar = st.progress(0, text=progress_text)
  
     # Loop on the list of UploadedFile objects 
     for up in uploaded:
+
         # Create a single WorkingGPX object for each of the uploaded objects
         w = WG.WorkingGPX(up)
         msg = f"New WorkingGPX.status from {up.name} is: {w.status}"
@@ -68,10 +72,15 @@ def prep_uploaded(st, uploaded):
         st.session_state.GPXdict = GPXdict
         # st.session_state.uploaded_list.append(w.alias)
 
+        percent_complete = count / len(uploaded)
+        my_bar.progress(percent_complete, text=progress_text)
+
         count = f.state('count')
         if count:
             msg = f"Successfully created {count} WorkingGPX {p.plural('object', count)}"
             f.state('working_status').update(msg, 'success')
+
+    my_bar.empty( )
 
         # else:
         #     msg = f"Unable to load/parse GPX upload '{up.name}'.  It has been removed from the uploaded list."
