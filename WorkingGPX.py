@@ -262,3 +262,4 @@ class GPXList( ):
                 st.write(WG.df)
         else:
             st.warning(f"print_GPXdict( ) called but there is no list to print")
+
