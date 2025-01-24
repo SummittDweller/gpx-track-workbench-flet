@@ -60,25 +60,57 @@ def get_datetime(gpx):
 #     return False
 
 
-# identify_city(lat, lon) - Use the reverse_geocode library to identify where 
+# identify_place(lat, lon) - Use the reverse_geocode library to identify where 
 # (city) a particular lat,lon coordinate pair is on the Earth.
 #-------------------------------------------------------------------------
-def identify_city(lat, lon):
+def identify_place(lat, lon):
     geolocator = Nominatim(user_agent="gpx2hikes")
     coord = "{}, {}".format(lat, lon)
     try:
         location = geolocator.reverse(coord)
         address = location.raw['address']
-        city = address.get('town','')
-        if not city: 
-            city = address.get('city','')
+
+        road = address.get('road','')
+        town = address.get('town','')
+        city = address.get('city','')
+        county = address.get('county', '')
         state = address.get('state', '')
         country = address.get('country', '')
 
+        # My display logic...
         if country == "United States":
-            return "{}, {}".format(city, state)
-        else:
-            return "{}, {}".format(city, country)
+            country = False
+        if state == "Iowa":
+            state = False
+
+        result = False
+
+        # If we have a town, return it
+        if town:
+            result = f"in {town}"
+        # If we have a city, return it
+        elif city:
+            result = f"in {city}"
+        
+        # No town or city?  Try returning road and county, if available
+        if not result:
+            if road and county:
+                result = f"on {road} in {county}"
+            elif county:
+                result = f"in rural {county}"
+            else:
+                result = f"{state}"
+                state = False
+
+        # Append the state if needed
+        if state:
+            result = result + f", {state}"
+
+        # And the country if needed
+        if country:
+            result = result + f" {country}"
+
+        return result
 
         # result = reverse_geocode.search(coord)
         # if result[0]['country_code'] == "US":
@@ -106,7 +138,7 @@ class WorkingGPX(object):
         self.alias = None
         self.fullname = None
         self.datetime = None
-        self.city = None
+        self.place = None
         self.weather = None
         self.mode = "Walking"       # Assumed.  Fix me!
         self.title = None
@@ -128,14 +160,10 @@ class WorkingGPX(object):
                 self.fullname = f.save_temp_gpx(st, gpx, self.alias)
                 self.center = get_track_center(gpx)
                 self.datetime = dt = get_datetime(gpx)
-                self.city = identify_city(self.center[0], self.center[1])
-                if self.city:
-                    loc = f"in {self.city.replace(', Iowa', '')}"
-                else: 
-                    loc = ""
-                # self.weather = get_weather(self.center[0], self.center[1], dt)
+                self.place = identify_place(self.center[0], self.center[1])
+                # self.weather = get_weather(self.center[0], self.center[1], dt)  ! Not here, too many API calls
                 self.weather = "Determined only when posted!"
-                self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {loc}"
+                self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {self.place}"
                 self.weight = "-" + dt.strftime('%Y%m%d%H%M')
                 self.Ym = '{}'.format(dt.strftime('%Y')) + '/' + '{}'.format(dt.strftime('%m'))
                 self.status = "Constructed from UploadedFile"

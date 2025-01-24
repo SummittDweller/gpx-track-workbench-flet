@@ -14,7 +14,7 @@ import inflect
 # Check if at least one WorkingGPX is 'loaded' for processing.  The number loaded 
 # should not exceed 'limit'.
 # --------------------------------------------------------------------------------
-def check_loaded(st, limit=10):
+def check_loaded(st, limit=20):
     loaded = f.state('loaded')
     if not loaded or len(loaded) < 1:
         msg = f"Use the 'GPX Selector' at the top of the main window to select at least ONE WorkingGPX object for processing!"
@@ -106,7 +106,7 @@ class CheckBoxArray:
             cols[i % num_cols].checkbox(label=cb, value=cb_values[i], disabled=disable, key=f"{self.name}_{i}")
 
 
-    def reload(self, max_select=10):
+    def reload(self, max_select=20):
         cb_values = [st.session_state.get(f"{self.name}_{i}", False) for i, _ in enumerate(self.checkboxes)]
         disable = sum(cb_values) == max_select
         for i, cb in enumerate(self.checkboxes):

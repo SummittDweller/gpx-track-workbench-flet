@@ -56,7 +56,7 @@ def make_markdown(st, g):
     md_file.write(f"title: {g.title}\n")
     md_file.write(f"weight: {g.weight}\n")
     md_file.write(f"publishDate: {pubDate}\n")
-    md_file.write(f"location: {g.city}\n")
+    md_file.write(f"location: {g.place}\n")
     md_file.write("highlight: false\n")
     md_file.write(f"bike: {bike}\n")
     md_file.write(f"trackType: {g.mode}.lower( )\n")
