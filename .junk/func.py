@@ -37,7 +37,7 @@ def get_weather(lat, lon, dt):
 #-------------------------------------------------------------------------
 # Use the reverse_geocode library to identify where (city) a particular
 # lat,lon coordinate pair is on the Earth.
-def identify_city(lat, lon):
+def identify_place(lat, lon):
   geolocator = Nominatim(user_agent="gpx2hikes")
   coord = "{}, {}".format(lat, lon)
   try:
@@ -154,7 +154,7 @@ def process_high_speed_trkpts(gpxData, trim):
         else:
           if first:
             print(f'Got our first track point under the speed threshold. Identify the city.')
-            city = identify_city(point.latitude, point.longitude)
+            city = identify_place(point.latitude, point.longitude)
             if city:
               gpxData['city'] = city
               print(f"Location has been identified as '{city}'.")

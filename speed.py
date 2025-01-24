@@ -34,7 +34,8 @@ def run_command(command):
 # --------------------------------------------------------------------------------------
 def gpsBabel_add_speed(st, working_path):
     temp = f.make_temp( )
-    parts = [ 'gpsbabel', '-t', '-i', 'gpx', '-f', working_path, '-x', 'track,speed', '-o', 'gpx,gpxver=1.0', '-F', temp ]
+    # parts = [ 'gpsbabel', '-t', '-i', 'gpx', '-f', working_path, '-x', 'track,speed', '-o', 'gpx,gpxver=1.0', '-F', temp ]
+    parts = [ 'gpsbabel', '-t', '-i', 'gpx', '-f', working_path, '-x', 'track,merge,speed', '-o', 'gpx,gpxver=1.0', '-F', temp ]
     command = ' '.join(parts)
     success = run_command(command)
     if success:
@@ -59,7 +60,7 @@ def speed_gpx(st):
     # This is a file operation, so no dataframe or GPX file handling needed here.
     num = len(loaded)
     if num == 1:
-        msg = f"speed_gpx(st) called with '{loaded[0].alias}' as '{loaded[0].fullname}'"
+        msg = f"speed_gpx(st) called with '{loaded[0].title}' as '{loaded[0].fullname}'"
     else:
         msg = f"speed_gpx(st) called with {num} loaded GPX"
     st.write(msg)
@@ -82,7 +83,7 @@ def trim_gpx(st):
     # This is a dataframe operation, load them one at a time
     num = len(loaded)
     if num == 1:
-        msg = f"trim_gpx(st) called with '{loaded[0].alias}' as '{loaded[0].fullname}'"
+        msg = f"trim_gpx(st) called with '{loaded[0].title}' as '{loaded[0].fullname}'"
     else:
         msg = f"trim_gpx(st) called with {num} loaded GPX"
     st.write(msg)

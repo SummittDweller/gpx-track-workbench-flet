@@ -8,8 +8,11 @@ from loguru import logger
 import WorkingGPX as WG
 import StatusBox as SB
 import inflect
+import time
 
-
+# uploader( ) - Our main upload form, called only once (and during a "rerun") at the 
+# beginning of the run
+# -----------------------------------------------------------------------------------
 def uploader( ):
     # If we already have GPX objects... do nothing here
     if f.state('count'):
@@ -24,7 +27,7 @@ def uploader( ):
         uploaded = st.file_uploader("Upload GPX Data", key=f"file_uploader", 
             type=["gpx"], accept_multiple_files=True, 
             help='Drag GPX files here and/or "Browse files" and select.  Click "Submit and Clear Uploader" when finished.')
-        submitted = st.form_submit_button("Submit and Clear Uploader")
+        submitted = st.form_submit_button("Submit and Open the Selector")
     
     # Once the form is submitted clear the placeholder
     if submitted:
@@ -41,7 +44,7 @@ def uploader( ):
         st.session_state.count = count
         if count:
             msg = f"{up_count} uploaded GPX {p.plural('object', up_count)} created {count} WorkingGPX {p.plural('object', count)}"
-            f.state('working_status').update(msg)
+            f.state('selection_status').update(msg)
 
 
 # prep_uploaded(st, uploaded) - Prepare working copies (WorkingGPX) of the uploaded list
@@ -54,33 +57,41 @@ def prep_uploaded(st, uploaded):
     GPXdict = WG.GPXList( )
     st.session_state.GPXdict = GPXdict
 
-    progress_text = "Upload and WorkingGPX creation in progress. Please wait."
-    my_bar = st.progress(0, text=progress_text)
+    # Run the prep in an st.empty container and clear it when done
+    prep = st.empty( )
+
+    with prep:
+
+        progress_text = "Upload and WorkingGPX creation in progress. Please wait."
+        my_bar = st.progress(0, text=progress_text)
  
-    # Loop on the list of UploadedFile objects 
-    for up in uploaded:
+        # Loop on the list of UploadedFile objects 
+        for up in uploaded:
 
-        # Create a single WorkingGPX object for each of the uploaded objects
-        w = WG.WorkingGPX(up)
-        msg = f"New WorkingGPX.status from {up.name} is: {w.status}"
-        f.state('logger').info(msg)
-        st.info(msg)
+            # Create a single WorkingGPX object for each of the uploaded objects
+            w = WG.WorkingGPX(up)
+            msg = f"New WorkingGPX.status from {up.name} is: {w.status}"
+            f.state('logger').info(msg)
+            st.info(msg)
 
-        # Add the new WorkingGPX object to our GPXList
-        count = GPXdict.append(w)
-        st.session_state.count = count
-        st.session_state.GPXdict = GPXdict
-        # st.session_state.uploaded_list.append(w.alias)
+            # Add the new WorkingGPX object to our GPXList
+            st.session_state.count = GPXdict.append(w)
+            st.session_state.GPXdict = GPXdict
+            # st.session_state.uploaded_list.append(w.alias)
 
-        percent_complete = count / len(uploaded)
-        my_bar.progress(percent_complete, text=progress_text)
+            count = f.state('count')
+            if count:
+                msg = f"Successfully created {count} WorkingGPX {p.plural('object', count)}"
+                f.state('selection_status').update(msg, 'success')
+                st.success(msg)
 
-        count = f.state('count')
-        if count:
-            msg = f"Successfully created {count} WorkingGPX {p.plural('object', count)}"
-            f.state('working_status').update(msg, 'success')
+            percent_complete = count / len(uploaded)
+            my_bar.progress(percent_complete, text=progress_text)
 
-    my_bar.empty( )
+        my_bar.empty( )
+
+    time.sleep(1)
+    prep.empty( )
 
         # else:
         #     msg = f"Unable to load/parse GPX upload '{up.name}'.  It has been removed from the uploaded list."
@@ -88,11 +99,6 @@ def prep_uploaded(st, uploaded):
         #     st.warning(msg)
         #     uploaded.remove(up)
         #     count -= 1
-
-    # print_state(st, 69)
-
-    # Set the session_state so the uploaded files do not replace the working copies!
-    # st.session_state.prepared = True    
 
     return count
 

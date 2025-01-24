@@ -21,10 +21,10 @@ def edit_df(st):
         st.error(f"GPX dataframe is NOT loaded!")
         return
     
-    msg = f"EDIT called for '{loaded[0].alias}' with WorkingGPX named '{loaded[0].fullname}'!"
+    msg = f"EDIT called for '{loaded[0].title}' with WorkingGPX named '{loaded[0].fullname}'!"
     f.state('uploader_status').update(msg)
 
-    msg = f"To remove track points select one or more rows on the left then use the trashcan icon to remove them."
+    msg = f"Remove points by checkmarking rows on the left and clicking the trashcan icon."
     st.write(msg)
 
     # Fetch the loaded WorkingGPX dataframe and GPX 

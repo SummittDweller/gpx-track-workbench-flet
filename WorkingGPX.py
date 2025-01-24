@@ -6,10 +6,7 @@ import constants as c
 import gpxpy
 import pandas as pd
 from datetime import datetime
-import os
-import time
-import json
-import requests
+import pytz
 from geopy.geocoders import Nominatim
 
 
@@ -35,50 +32,85 @@ def get_datetime(gpx):
         for segment in track.segments:
             for point in segment.points:
                 t = point.time
-                local = t.astimezone( )  # Convert it to your local timezone (still aware)
+                local = t.astimezone(pytz.timezone('US/Central'))  # Convert it to your local timezone (still aware)
                 return local
     return False
 
 
-# get_weather(lat, lon, dt) - Get historical weather data from 
-# OpenWeatherMap.org for the location and time specified.
-#-------------------------------------------------------------------------
-def get_weather(lat, lon, dt):
-    try:
-        unix_time = int(time.mktime(dt.timetuple()))
-        api_key = os.environ.get("OPEN_WEATHER_KEY", "Key Not Found!")
-        api_url = c.OPEN_WEATHER_CALL.format(lat, lon, unix_time, api_key)
-        # response = requests.get(api_url)
-        # if response:
-        #     weather = json.loads(response.text)
-        #     d = weather['data'][0]
-        #     w = d['weather'][0]
-        #     return f"{w['main']} and {d['temp']}&deg;F (wind chill={d['feels_like']}) with {d['humidity']}% humidity and winds at {d['wind_speed']} mph."
-        return f"Bogus clouds and -20&deg;F (wind chill=-30) with 200% humidity and winds at 20 mph."
-    except Exception as e:
-        print(f"Exception: {e}")
-    return False
+# Don't do this!  It makes too many calls to the OPEN WEATHER service!   
+# This function moved to post.py!
+#
+# # get_weather(lat, lon, dt) - Get historical weather data from 
+# # OpenWeatherMap.org for the location and time specified.
+# #-------------------------------------------------------------------------
+# def get_weather(lat, lon, dt):
+#     try:
+#         unix_time = int(time.mktime(dt.timetuple()))
+#         api_key = os.environ.get("OPEN_WEATHER_KEY", "Key Not Found!")
+#         api_url = c.OPEN_WEATHER_CALL.format(lat, lon, unix_time, api_key)
+#         # response = requests.get(api_url)
+#         # if response:
+#         #     weather = json.loads(response.text)
+#         #     d = weather['data'][0]
+#         #     w = d['weather'][0]
+#         #     return f"{w['main']} and {d['temp']}&deg;F (wind chill={d['feels_like']}) with {d['humidity']}% humidity and winds at {d['wind_speed']} mph."
+#         return f"Bogus clouds and -20&deg;F (wind chill=-30) with 200% humidity and winds at 20 mph."
+#     except Exception as e:
+#         print(f"Exception: {e}")
+#     return False
 
 
-# identify_city(lat, lon) - Use the reverse_geocode library to identify where 
+# identify_place(lat, lon) - Use the reverse_geocode library to identify where 
 # (city) a particular lat,lon coordinate pair is on the Earth.
 #-------------------------------------------------------------------------
-def identify_city(lat, lon):
+def identify_place(lat, lon):
     geolocator = Nominatim(user_agent="gpx2hikes")
     coord = "{}, {}".format(lat, lon)
     try:
         location = geolocator.reverse(coord)
         address = location.raw['address']
-        city = address.get('town','')
-        if not city: 
-            city = address.get('city','')
+
+        road = address.get('road','')
+        town = address.get('town','')
+        city = address.get('city','')
+        county = address.get('county', '')
         state = address.get('state', '')
         country = address.get('country', '')
 
+        # My display logic...
         if country == "United States":
-            return "{}, {}".format(city, state)
-        else:
-            return "{}, {}".format(city, country)
+            country = False
+        if state == "Iowa":
+            state = False
+
+        result = False
+
+        # If we have a town, return it
+        if town:
+            result = f"in {town}"
+        # If we have a city, return it
+        elif city:
+            result = f"in {city}"
+        
+        # No town or city?  Try returning road and county, if available
+        if not result:
+            if road and county:
+                result = f"on {road} in {county}"
+            elif county:
+                result = f"in rural {county}"
+            else:
+                result = f"{state}"
+                state = False
+
+        # Append the state if needed
+        if state:
+            result = result + f", {state}"
+
+        # And the country if needed
+        if country:
+            result = result + f" {country}"
+
+        return result
 
         # result = reverse_geocode.search(coord)
         # if result[0]['country_code'] == "US":
@@ -106,7 +138,7 @@ class WorkingGPX(object):
         self.alias = None
         self.fullname = None
         self.datetime = None
-        self.city = None
+        self.place = None
         self.weather = None
         self.mode = "Walking"       # Assumed.  Fix me!
         self.title = None
@@ -128,13 +160,10 @@ class WorkingGPX(object):
                 self.fullname = f.save_temp_gpx(st, gpx, self.alias)
                 self.center = get_track_center(gpx)
                 self.datetime = dt = get_datetime(gpx)
-                self.city = identify_city(self.center[0], self.center[1])
-                if self.city:
-                    loc = f"in {self.city.replace(', Iowa', '')}"
-                else: 
-                    loc = ""
-                self.weather = get_weather(self.center[0], self.center[1], dt)
-                self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {loc}"
+                self.place = identify_place(self.center[0], self.center[1])
+                # self.weather = get_weather(self.center[0], self.center[1], dt)  ! Not here, too many API calls
+                self.weather = "Determined only when posted!"
+                self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {self.place}"
                 self.weight = "-" + dt.strftime('%Y%m%d%H%M')
                 self.Ym = '{}'.format(dt.strftime('%Y')) + '/' + '{}'.format(dt.strftime('%m'))
                 self.status = "Constructed from UploadedFile"
@@ -157,7 +186,7 @@ class WorkingGPX(object):
         self.datetime = get_datetime(g)
         with open(self.fullname, 'w') as wf:
             wf.write(g.to_xml( ))
-        msg = f"WorkingGPX.update_from_df( ) has updated object '{self.alias}' as '{self.fullname}'."
+        msg = f"WorkingGPX.update_from_df( ) has updated object '{self.title}' as '{self.fullname}'."
         f.state('logger').info(msg)
         # Store the new object in our GPXdict
         d = f.state('GPXdict')
@@ -239,13 +268,13 @@ class GPXList( ):
 
 
     def update(self, object):
-        self.list[object.alias] = object
+        self.list[object.title] = object
         count = len(self.list)
         return count
 
 
     def append(self, object):
-        self.list[object.alias] = object
+        self.list[object.title] = object
         count = len(self.list)
         return count
 
@@ -261,3 +290,4 @@ class GPXList( ):
                 st.write(WG.df)
         else:
             st.warning(f"print_GPXdict( ) called but there is no list to print")
+
