@@ -17,7 +17,7 @@ import inflect
 def check_loaded(st, limit=10):
     loaded = f.state('loaded')
     if not loaded or len(loaded) < 1:
-        msg = f"Use the 'Select GPX' button in the sidebar to select at least ONE WorkingGPX object for processing!"
+        msg = f"Use the 'GPX Selector' at the top of the main window to select at least ONE WorkingGPX object for processing!"
         st.error(msg)
         return False
     if len(loaded) > limit:
@@ -32,50 +32,6 @@ def check_loaded(st, limit=10):
         st.info(msg)
         f.state('selection_status').update(msg)
     return True
-
-
-# # Select and return ONE WorkingGPX object from our GPXList
-# # ------------------------------------------------------------------------
-# def pick_one(st):
-#     count = f.state('count')
-#     if not count: 
-#         st.session_state.loaded = None
-#         return None
-
-#     # IF there is ONLY one GPX available, set our session_state and return it ASAP!
-#     if count == 1:
-#         gDict = f.state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
-#         first_key = list(gDict.list.keys( ))[0]
-#         loaded = gDict.list[first_key]
-#         st.session_state.loaded = loaded
-#         return loaded
-
-#     # Fetch the current "loaded" object, if any
-#     loaded = f.state('loaded')
-
-#     # Build our options list... names of the uploaded GPX 
-#     options = []
-#     gDict = f.state('GPXdict')    # a GPXList object, a dict of WorkingGPX objects. keys are the .alias elements
-#     for key in gDict.list:
-#         options.append(key)
-
-#     label = f"🔄 Choose one GPX to load for processing"
-
-#     # Open the WorkingGPX selector in an st.form( ) inside an st.empty( ) and clear once selected
-#     placeholder = st.empty( )
-
-#     # Invoke the dropdown selector
-#     with placeholder.form(key=f"selector_form", clear_on_submit=True):
-#         option = st.selectbox(label, options, index=None)      # wait for a selection and return it
-#         loaded = gDict.list[option]
-#         st.session_state.loaded = loaded
-#         submitted = st.form_submit_button("Submit")
-    
-#     # Once the form is submitted clear the placeholder
-#     if submitted:
-#         placeholder.empty( )
-
-#     return loaded
 
 
 # Select and return a list of selected WorkingGPX objects from our GPXList

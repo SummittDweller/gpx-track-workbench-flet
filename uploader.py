@@ -10,7 +10,9 @@ import StatusBox as SB
 import inflect
 import time
 
-
+# uploader( ) - Our main upload form, called only once (and during a "rerun") at the 
+# beginning of the run
+# -----------------------------------------------------------------------------------
 def uploader( ):
     # If we already have GPX objects... do nothing here
     if f.state('count'):
@@ -55,7 +57,7 @@ def prep_uploaded(st, uploaded):
     GPXdict = WG.GPXList( )
     st.session_state.GPXdict = GPXdict
 
-    # Run the prep in an st.container and clear it when done
+    # Run the prep in an st.empty container and clear it when done
     prep = st.empty( )
 
     with prep:
@@ -88,7 +90,7 @@ def prep_uploaded(st, uploaded):
 
         my_bar.empty( )
 
-    time.sleep(3)
+    time.sleep(1)
     prep.empty( )
 
         # else:

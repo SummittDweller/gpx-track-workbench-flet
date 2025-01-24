@@ -6,10 +6,7 @@ import constants as c
 import gpxpy
 import pandas as pd
 from datetime import datetime
-import os
-import time
-import json
-import requests
+import pytz
 from geopy.geocoders import Nominatim
 
 
@@ -35,29 +32,32 @@ def get_datetime(gpx):
         for segment in track.segments:
             for point in segment.points:
                 t = point.time
-                local = t.astimezone( )  # Convert it to your local timezone (still aware)
+                local = t.astimezone(pytz.timezone('US/Central'))  # Convert it to your local timezone (still aware)
                 return local
     return False
 
 
-# get_weather(lat, lon, dt) - Get historical weather data from 
-# OpenWeatherMap.org for the location and time specified.
-#-------------------------------------------------------------------------
-def get_weather(lat, lon, dt):
-    try:
-        unix_time = int(time.mktime(dt.timetuple()))
-        api_key = os.environ.get("OPEN_WEATHER_KEY", "Key Not Found!")
-        api_url = c.OPEN_WEATHER_CALL.format(lat, lon, unix_time, api_key)
-        # response = requests.get(api_url)
-        # if response:
-        #     weather = json.loads(response.text)
-        #     d = weather['data'][0]
-        #     w = d['weather'][0]
-        #     return f"{w['main']} and {d['temp']}&deg;F (wind chill={d['feels_like']}) with {d['humidity']}% humidity and winds at {d['wind_speed']} mph."
-        return f"Bogus clouds and -20&deg;F (wind chill=-30) with 200% humidity and winds at 20 mph."
-    except Exception as e:
-        print(f"Exception: {e}")
-    return False
+# Don't do this!  It makes too many calls to the OPEN WEATHER service!   
+# This function moved to post.py!
+#
+# # get_weather(lat, lon, dt) - Get historical weather data from 
+# # OpenWeatherMap.org for the location and time specified.
+# #-------------------------------------------------------------------------
+# def get_weather(lat, lon, dt):
+#     try:
+#         unix_time = int(time.mktime(dt.timetuple()))
+#         api_key = os.environ.get("OPEN_WEATHER_KEY", "Key Not Found!")
+#         api_url = c.OPEN_WEATHER_CALL.format(lat, lon, unix_time, api_key)
+#         # response = requests.get(api_url)
+#         # if response:
+#         #     weather = json.loads(response.text)
+#         #     d = weather['data'][0]
+#         #     w = d['weather'][0]
+#         #     return f"{w['main']} and {d['temp']}&deg;F (wind chill={d['feels_like']}) with {d['humidity']}% humidity and winds at {d['wind_speed']} mph."
+#         return f"Bogus clouds and -20&deg;F (wind chill=-30) with 200% humidity and winds at 20 mph."
+#     except Exception as e:
+#         print(f"Exception: {e}")
+#     return False
 
 
 # identify_city(lat, lon) - Use the reverse_geocode library to identify where 
@@ -133,7 +133,8 @@ class WorkingGPX(object):
                     loc = f"in {self.city.replace(', Iowa', '')}"
                 else: 
                     loc = ""
-                self.weather = get_weather(self.center[0], self.center[1], dt)
+                # self.weather = get_weather(self.center[0], self.center[1], dt)
+                self.weather = "Determined only when posted!"
                 self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {loc}"
                 self.weight = "-" + dt.strftime('%Y%m%d%H%M')
                 self.Ym = '{}'.format(dt.strftime('%Y')) + '/' + '{}'.format(dt.strftime('%m'))

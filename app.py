@@ -44,41 +44,6 @@ import inflect
 # from io import BytesIO
 
 
-
-
-# # on_change(key) - Define the menu's on_change callback
-# # ------------------------------------------------------------------------------------------
-# def on_change(key):
-#     selection = st.session_state[key]
-#     # st.success(f"Selection changed to: {selection}")
-#     # st.session_state
-
-#     # Act on the selected key
-#     match selection:
-#         case c.EDIT:
-#             if not f.state('loaded'):
-#                 st.session_state.loaded = select.pick_one(st)
-            
-#             loaded = f.state('loaded')
-#             if loaded:
-#                 f.state('selection_status').update(f"{loaded.name} loaded for {selection}")
-#                 f.edit_df(st)
-
-#         case c.MAP:
-#             st.warning("MAP not available")
-#         case c.SPEED:
-#             st.warning("SPEED not available")
-#         case c.POST:
-#             st.warning("POST not available")
-#         case c.RESET:
-#             st.warning('Hold on to your butt!')
-#         # If an exact match is not confirmed, this last case will be used if provided
-#         case _:
-#             st.error("Something's wrong in on_change( )")
-    
-#     return
-
-
 # init_state( )
 # Initialize all of the st.session_state values
 def init_state( ):
@@ -143,6 +108,19 @@ def init_sidebar( ):
 
 st.title("GPX Track Workbench")
 
+# Set custom app styles
+st.markdown("""
+<style>
+    div.stMainBlockContainer {
+        padding: 3rem 1rem;
+        max-width: none;       # was 46 rem
+    }
+    div.stVerticalBlock {
+        gap: none
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Initialize our state variables!  Make sure the logger is initialized!
 init_state( )
 
@@ -165,84 +143,86 @@ if loaded:
 if st.session_state.count:
     st.session_state.loaded = select.pick_some(st)
 
-    # Create our main menu container 
-    if st.session_state.count:
-        menu = st.container( )
-        with menu:
-            st.session_state.main_menu_selection = option_menu("Main Menu", [ '---', c.EDIT, c.MAP, c.SPEED, c.TRIM, c.POST], 
-            icons=['', 'pencil', 'map', 'speedometer', 'scissors', 'signpost-split'], 
-            menu_icon="", key='main_menu', default_index=0)  # , on_change=on_change  
+# Same for the Main Menu, also in an st.expander( )
+if st.session_state.count:
+    menu = st.expander("Main Menu", expanded=False)
+    with menu:
+        st.session_state.main_menu_selection = option_menu("Main Menu", [ '---', c.EDIT, c.MAP, c.SPEED, c.TRIM, c.POST], 
+        icons=['', 'pencil', 'map', 'speedometer', 'scissors', 'signpost-split'], 
+        menu_icon="", key='main_menu', default_index=0)  # , on_change=on_change  
+        f.trace( )
+
+        # Do some things in the main area
+        selected = f.state('main_menu_selection')
+        if selected:
+            st.write(selected)
             f.trace( )
 
-            # Do some things in the main area
-            selected = f.state('main_menu_selection')
-            if selected:
-                st.write(selected)
-                f.trace( )
+            # Fetch what's loaded... at least one GPX
+            loaded = f.state('loaded')
 
-                # Fetch what's loaded... at least one GPX
-                loaded = f.state('loaded')
+            # Take action!  Replaces the on_change( ) function...
+            match selected:
 
-                # Take action!  Replaces the on_change( ) function...
-                match selected:
-
-                    case '---':
-                        st.write('Select an action from the Main Menu')
+                case '---':
+                    st.write('Select an action from the Main Menu')
+                    f.trace( )
+    
+                case c.EDIT:
+                    loaded = select.check_loaded(st, 1)
+                    f.trace( )
+                    loaded = f.state('loaded')
+                    f.trace( )
+                    if loaded:
+                        st.header(loaded[0].title)
+                        e.edit_df(st)
                         f.trace( )
-        
-                    case c.EDIT:
-                        loaded = select.check_loaded(st, 1)
+    
+                case c.MAP:
+                    loaded = select.check_loaded(st, 1)
+                    f.trace( )
+                    loaded = f.state('loaded')
+                    f.trace( )
+                    if loaded:
+                        st.header(loaded[0].title)
+                        m.map_gpx(st)
                         f.trace( )
-                        loaded = f.state('loaded')
+    
+                case c.SPEED:
+                    loaded = select.check_loaded(st)
+                    f.trace( )
+                    loaded = f.state('loaded')
+                    f.trace( )
+                    if loaded:
+                        s.speed_gpx(st)
                         f.trace( )
-                        if loaded:
-                            e.edit_df(st)
-                            f.trace( )
-        
-                    case c.MAP:
-                        loaded = select.check_loaded(st, 1)
+    
+                case c.TRIM:
+                    loaded = select.check_loaded(st)
+                    f.trace( )
+                    loaded = f.state('loaded')
+                    f.trace( )
+                    if loaded:
+                        s.trim_gpx(st)
                         f.trace( )
-                        loaded = f.state('loaded')
+                
+                case c.POST:
+                    loaded = select.check_loaded(st)
+                    f.trace( )
+                    loaded = f.state('loaded')
+                    f.trace( )
+                    if loaded:
+                        p.post_gpx(st)
                         f.trace( )
-                        if loaded:
-                            m.map_gpx(st)
-                            f.trace( )
-        
-                    case c.SPEED:
-                        loaded = select.check_loaded(st)
-                        f.trace( )
-                        loaded = f.state('loaded')
-                        f.trace( )
-                        if loaded:
-                            s.speed_gpx(st)
-                            f.trace( )
-        
-                    case c.TRIM:
-                        loaded = select.check_loaded(st)
-                        f.trace( )
-                        loaded = f.state('loaded')
-                        f.trace( )
-                        if loaded:
-                            s.trim_gpx(st)
-                            f.trace( )
-                    
-                    case c.POST:
-                        loaded = select.check_loaded(st)
-                        f.trace( )
-                        loaded = f.state('loaded')
-                        f.trace( )
-                        if loaded:
-                            p.post_gpx(st)
-                            f.trace( )
-                    
-                    case c.RESET:
-                        st.warning('Hold on to your butt!')
-                        f.trace( )
-                    
-                    # If an exact match is not confirmed, this last case will be used if provided
-                    case _:
-                        st.error("Something's wrong in on_change( )")
-                        f.trace( )
+                
+                case c.RESET:
+                    st.warning('Hold on to your butt!')
+                    f.trace( )
+                
+                # If an exact match is not confirmed, this last case will be used if provided
+                case _:
+                    st.error("Something's wrong in on_change( )")
+                    f.trace( )
 
 # # Print the GPXList dict of WG objects
 # f.trace( )
