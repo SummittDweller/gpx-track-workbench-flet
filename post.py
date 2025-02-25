@@ -84,9 +84,10 @@ def get_weather(lat, lon, dt):
             d = weather['data'][0]
             w = d['weather'][0]
             return f"{w['main']} and {d['temp']}&deg;F (wind chill={d['feels_like']}) with {d['humidity']}% humidity and winds at {d['wind_speed']} mph."
+        return f"Weather request returned a negative response."
     except Exception as e:
         print(f"Exception: {e}")
-    return False
+    return f"Weather data is not available."
 
 
 # add_track_to_markdown - Add GPX reference to the open Markdown file
