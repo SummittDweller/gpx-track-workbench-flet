@@ -32,8 +32,9 @@ def get_datetime(gpx):
         for segment in track.segments:
             for point in segment.points:
                 t = point.time
-                local = t.astimezone(pytz.timezone('US/Central'))  # Convert it to your local timezone (still aware)
-                return local
+                if t:
+                    local = t.astimezone(pytz.timezone('US/Central'))  # Convert it to your local timezone (still aware)
+                    return local               
     return False
 
 
@@ -163,9 +164,12 @@ class WorkingGPX(object):
                 self.place = identify_place(self.center[0], self.center[1])
                 # self.weather = get_weather(self.center[0], self.center[1], dt)  ! Not here, too many API calls
                 self.weather = "Determined only when posted!"
-                self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {self.place}"
-                self.weight = "-" + dt.strftime('%Y%m%d%H%M')
-                self.Ym = '{}'.format(dt.strftime('%Y')) + '/' + '{}'.format(dt.strftime('%m'))
+                if dt:
+                    self.title = f"{dt.strftime("%a %b %d")} at {dt.strftime("%-l%p").lower()} - {self.mode} {self.place}"
+                    self.weight = "-" + dt.strftime('%Y%m%d%H%M')
+                    self.Ym = '{}'.format(dt.strftime('%Y')) + '/' + '{}'.format(dt.strftime('%m'))
+                else:
+                    self.title = f"{self.mode} {self.place}"
                 self.status = "Constructed from UploadedFile"
             else:
                 self.status = "Constructor Failed!"
