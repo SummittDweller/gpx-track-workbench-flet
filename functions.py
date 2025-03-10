@@ -209,7 +209,7 @@ def uploaded_to_working(st, uploaded):
 #   save a TEMP copy of the GPX.
 # ------------------------------------------------------------------------------
 def save_temp_gpx(st, gpx, name):
-    new_path = os.path.join(c.TEMP_DIR, working_name(name))
+    new_path = os.path.join(os.environ.get('HOME') + c.TEMP_DIR, working_name(name))
     with open(new_path, 'w') as f:
         f.write(gpx.to_xml( ))
     msg = f"A working copy of '{name}' was saved in '{new_path}'."
@@ -241,7 +241,7 @@ def get_track_center(gpx):
 # source GPX filename in session_state
 # ---------------------------------------------------------------------------
 def serialize_dataframe(st, dataframe, source):
-    dataframe.to_csv(c.DF_CSV, index=False)
+    dataframe.to_csv(os.environ.get('HOME') + c.DF_CSV, index=False)
     st.session_state.df = source
     return source
 
@@ -250,7 +250,7 @@ def serialize_dataframe(st, dataframe, source):
 #   must read our dataframe or 'deserialize' it
 # ---------------------------------------------------------------------------
 def deserialize_dataframe( ):
-    df = pd.read_csv(c.DF_CSV)
+    df = pd.read_csv(os.environ.get('HOME') + c.DF_CSV)
     return df
 
 
@@ -280,13 +280,13 @@ def run_command(command):
 def make_temp( ):
     # Make the c.TEMP_DIR directory if needed
     try:
-        os.mkdir(c.TEMP_DIR)
+        os.mkdir(os.environ.get('HOME') + c.TEMP_DIR)
     except FileExistsError:
         pass
     except Exception as e:
         st.exception(e)
 
-    temp_path = os.path.join(c.TEMP_DIR, c.TEMP_FILE)
+    temp_path = os.path.join(os.environ.get('HOME') + c.TEMP_DIR, c.TEMP_FILE)
     st.session_state.temp_path = temp_path
 
     return temp_path
@@ -316,7 +316,7 @@ def gpsBabel_add_speed(st, working_path):
 def working_name(path):
     dir = os.path.dirname(path)
     file = os.path.basename(path)
-    new_name = os.path.join(c.TEMP_DIR, file.replace(' ','_').lower( ))
+    new_name = os.path.join(os.environ.get('HOME') + c.TEMP_DIR, file.replace(' ','_').lower( ))
     return new_name
 
 

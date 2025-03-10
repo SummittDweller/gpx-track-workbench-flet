@@ -11,15 +11,14 @@ TRIM = 'Trim Speed'
 POST = 'Post Tracks to Hikes'
 RESET = 'Reset!'
 
-RAW_GPX_DIR = '/Users/mark/GitHub/GPX-Track-Workbench/sample_data'
-
-TEMP_DIR = '/Users/mark/tmp/'
-DF_CSV = '/Users/mark/tmp/dataframe.csv'
+RAW_GPX_DIR = '/GitHub/GPX-Track-Workbench/sample_data'
+TEMP_DIR = '/tmp/'
+DF_CSV = '/tmp/dataframe.csv'
 
 # RAW_GPX_DIR = '/Users/mark/Downloads/'
 
-CONTENT_HIKES_DIR = '/Users/mark/GitHub/hikes/content/hikes/'
-STATIC_GPX_DIR = '/Users/mark/GitHub/hikes/static/gpx/'
+CONTENT_HIKES_DIR = '/GitHub/hikes/content/hikes/'
+STATIC_GPX_DIR = '/GitHub/hikes/static/gpx/'
 
 FILENAME_PATTERN = '*king 20*.gpx'
 SELECT_ONLY = '.gpx'
@@ -27,7 +26,7 @@ SELECT_ONLY = '.gpx'
 TIME_ZONE = 'America/Chicago'
 MAP_CENTER = [42, -92.5]
 
-TEMP_DIR = '/Users/mark/tmp/'
+TEMP_DIR = '/tmp/'
 TEMP_FILE = 'temporary.gpx'
 
 TIME_DELTA_THRESHOLD = 2             # 2 hours

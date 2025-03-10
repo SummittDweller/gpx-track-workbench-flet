@@ -57,7 +57,7 @@ print("Trim: {}".format(trim))
 #--------------------------------------------------------------------------
 # Make the c.TEMP_DIR directory if needed
 try:
-  os.mkdir(c.TEMP_DIR)
+  os.mkdir(os.environ.get('HOME') + c.TEMP_DIR)
 except Exception as e:
   print("Exception: {}\n".format(e)) 
 
@@ -65,16 +65,16 @@ except Exception as e:
 # Save the current working directory and 'cd' into c.TEMP_DIR for all
 # future operations
 cwd = os.getcwd( )
-os.chdir(c.TEMP_DIR)  
+os.chdir(os.environ.get('HOME') + c.TEMP_DIR)  
 
 #--------------------------------------------------------------------------
 # Glob up all the FILENAME_PATTERN .gpx files in the raw GPX directory for processing
-gpxFiles = glob.glob(c.FILENAME_PATTERN, root_dir=c.RAW_GPX_DIR)
-print("List of GPX files to examine in {}: {}\n".format(c.RAW_GPX_DIR, gpxFiles))
+gpxFiles = glob.glob(c.FILENAME_PATTERN, root_dir=os.environ.get('HOME') + c.RAW_GPX_DIR)
+print("List of GPX files to examine in {}: {}\n".format(os.environ.get('HOME') + c.RAW_GPX_DIR, gpxFiles))
 
 #--------------------------------------------------------------------------
 # Loop on all the gpxFiles sorted in chronological order and build a 
-# sorted list, gpxData_list, in c.TEMP_DIR with no spaces in the names
+# sorted list, gpxData_list, in TEMP_DIR with no spaces in the names
 try:
   gpxFiles.sort(key=lambda x: datetime.strptime(x[8:-4], '%Y-%m-%dT%H%M'))
 except Exception as e:
@@ -86,7 +86,7 @@ for index, file in enumerate(gpxFiles):     # now in sorted order
   gpxData = f.make_gpxData(file)   # build GPX file data structure
   if gpxData:
     gpxData_list.append(gpxData)
-    shutil.copy(c.RAW_GPX_DIR + file, gpxData['new_name'])
+    shutil.copy(os.environ.get('HOME') + c.RAW_GPX_DIR + file, gpxData['new_name'])
 
 print('\n')
 
@@ -162,9 +162,9 @@ for gpxData in gpxData_list:
 
 # All done, delete the c.TEMP_DIR directory and its contents
 try:
-  shutil.rmtree(c.TEMP_DIR)
+  shutil.rmtree(os.environ.get('HOME') + c.TEMP_DIR)
 except OSError as e:
-  print(f"Error: {c.TEMP_DIR} : {e.strerror}")
+  print(f"Error: {os.environ.get('HOME') + c.TEMP_DIR} : {e.strerror}")
 
 # Move (cd) back where we started
 os.chdir(cwd)  

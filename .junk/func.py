@@ -93,7 +93,7 @@ def add_point(segment, lat, lon, elev, time):
 # Save the current GPX file
 def save_gpx(gpx, path, track_count, point_count):
   track_count += 1                       # increment the track_count and return it
-  file = c.TEMP_DIR + c.TEMP_FILE
+  file = os.environ.get('HOME') + c.TEMP_DIR + c.TEMP_FILE
   try:
     s = gpx.to_xml(version="1.0")    # gpx as a string
     new_path = path.replace('.gpx', f'-{track_count}.gpx')
@@ -109,7 +109,7 @@ def save_gpx(gpx, path, track_count, point_count):
 # Process high-speed trkpts from a .gpx
 def process_high_speed_trkpts(gpxData, trim):
   local_trim = trim
-  path = c.TEMP_DIR + gpxData['new_name']
+  path = os.environ.get('HOME') + c.TEMP_DIR + gpxData['new_name']
   gpx_file = open(path, 'r')
 
   # Parse the gpx file and prep for our loop
@@ -201,7 +201,7 @@ def process_high_speed_trkpts(gpxData, trim):
 # Run a GPSBabel command and print output
 def gpsBabel(command):
   try:
-    result = s.run(command, cwd=c.TEMP_DIR, shell=True, capture_output=True, text=True)
+    result = s.run(command, cwd=os.environ.get('HOME') + c.TEMP_DIR, shell=True, capture_output=True, text=True)
     print('\n')
     print("Running subprocess command: '{}'.".format(command))
     print("  stdout: {}".format(result.stdout))
@@ -216,17 +216,17 @@ def gpsBabel(command):
 # GPSBabel command to add <speed> tags to trkpts and save to same file
 def gpsBabel_add_speed(gpxData):
   import shutil
-  parts = [ 'gpsbabel', '-t', '-i', 'gpx', '-f', gpxData['new_name'], '-x', 'track,speed', '-o', 'gpx,gpxver=1.0', '-F', c.TEMP_FILE ]
+  parts = [ 'gpsbabel', '-t', '-i', 'gpx', '-f', gpxData['new_name'], '-x', 'track,speed', '-o', 'gpx,gpxver=1.0', '-F', os.environ.get('HOME') + c.TEMP_FILE ]
   command = ' '.join(parts)
   if gpsBabel(command):
-    shutil.move(c.TEMP_FILE, gpxData['new_name'])
+    shutil.move(os.environ.get('HOME') + c.TEMP_FILE, gpxData['new_name'])
 
 
 #-------------------------------------------------------------------------
 # GPSBabel command to combine tracks from two files into one
 # Example: gpsbabel -i geo -f 1.loc -i gpx -f 2.gpx -i pcx 3.pcx -o gpsutil -F big.gps
 def gpsBabel_merge_files(path1, path2):
-  new_name = c.TEMP_DIR + c.TEMP_FILE
+  new_name = os.environ.get('HOME') + c.TEMP_DIR + c.TEMP_FILE
   parts = [ 'gpsbabel', '-i', 'gpx', '-f', path1.replace(' ','\ '), '-i', 'gpx', '-f', path2.replace(' ','\ '), '-o', 'gpx', '-F', new_name ]
   command = ' '.join(parts)
   if gpsBabel(command):
@@ -257,7 +257,7 @@ def make_markdown(gpxData):
   pubTime = gpxData['time']
 
   # Open the new .md file
-  md_dir = c.CONTENT_HIKES_DIR + gpxData['Ym'] + '/'
+  md_dir = os.environ.get('HOME') + c.CONTENT_HIKES_DIR + gpxData['Ym'] + '/'
   try:
     os.mkdir(md_dir)
   except FileExistsError:
@@ -322,7 +322,7 @@ def add_track_to_markdown(gpxData, counter, md_file):
       md_file.write(leaflet_track + '\n');
 
     # Copy the .gpx file to c.STATIC_GPX_DIR year/month subdirectory
-    gpx_dir = c.STATIC_GPX_DIR + Ym + '/'
+    gpx_dir = os.environ.get('HOME') + c.STATIC_GPX_DIR + Ym + '/'
 
     try:
       os.mkdir(gpx_dir)
@@ -332,7 +332,7 @@ def add_track_to_markdown(gpxData, counter, md_file):
       print(f'Exception: {e}')
 
     try:
-      shutil.copy(c.TEMP_DIR + gpx_name, gpx_dir + gpx_name)
+      shutil.copy(os.environ.get('HOME') + c.TEMP_DIR + gpx_name, gpx_dir + gpx_name)
     except FileExistsError:
       pass
     except Exception as e:

@@ -24,7 +24,7 @@ import speed as s
 import traceback as tb
 import post as p
 
-# import os 
+import os 
 # import shutil
 import streamlit as st
 from loguru import logger
@@ -78,7 +78,7 @@ def init_state( ):
     if not f.state('posted_to_local'):
         st.session_state.posted_to_local = None      # count of files posted to LOCAL hikes
     if not f.state('my_path'):                       
-        st.session_state.my_path = c.RAW_GPX_DIR    # set appropriate starting directory
+        st.session_state.my_path = os.environ.get('HOME') + c.RAW_GPX_DIR    # set appropriate starting directory
     if not f.state('mph_limit'):                 
         st.session_state.mph_limit = c.SPEED_THRESHOLD    # default walking speed threshold for trim
 
