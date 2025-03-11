@@ -15,7 +15,6 @@ import pandas as pd
 from datetime import datetime, timedelta
 from retry_requests import retry
 from geopy.geocoders import Nominatim
-from timezonefinder import TimezoneFinder
 import pytz
 
 
@@ -75,31 +74,31 @@ def make_markdown(st, g):
     return md_file
 
 
-def calculate_timezone_offset(lat: float, lng: float, dt: datetime) -> float:
-    """
-    Calculates the timezone offset in hours for a given latitude, longitude, and datetime.
+# def calculate_timezone_offset(lat: float, lng: float, dt: datetime) -> float:
+#     """
+#     Calculates the timezone offset in hours for a given latitude, longitude, and datetime.
 
-    Args:
-        lat: Latitude.
-        lng: Longitude.
-        dt: Datetime object.
+#     Args:
+#         lat: Latitude.
+#         lng: Longitude.
+#         dt: Datetime object.
 
-    Returns:
-        Timezone offset in hours.
-    """
-    tf = TimezoneFinder( )
-    timezone_str = tf.timezone_at(lng=lng, lat=lat)
+#     Returns:
+#         Timezone offset in hours.
+#     """
+#     tf = TimezoneFinder( )
+#     timezone_str = tf.timezone_at(lng=lng, lat=lat)
 
-    if timezone_str is None:
-        raise ValueError("Could not determine timezone for the given coordinates.")
+#     if timezone_str is None:
+#         raise ValueError("Could not determine timezone for the given coordinates.")
 
-    timezone = pytz.timezone(timezone_str)
-    localized_dt = timezone.localize(dt, is_dst=None)
-    utc_dt = localized_dt.astimezone(pytz.utc)
+#     timezone = pytz.timezone(timezone_str)
+#     localized_dt = timezone.localize(dt, is_dst=None)
+#     utc_dt = localized_dt.astimezone(pytz.utc)
 
-    offset_seconds = (dt - utc_dt).total_seconds()
-    offset_hours = offset_seconds / 3600
-    return offset_hours
+#     offset_seconds = (dt - utc_dt).total_seconds()
+#     offset_hours = offset_seconds / 3600
+#     return offset_hours
 
 
 def calculate_wind_chill(temp_fahrenheit, wind_speed_mph):
@@ -149,17 +148,17 @@ def get_weather(lat, lon, dt):
 
     # Process first location. Add a for-loop for multiple locations or weather models
     response = responses[0]
-    print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
-    print(f"Elevation {response.Elevation()} m asl")
-    print(f"Timezone {response.Timezone()}{response.TimezoneAbbreviation()}")
-    print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+    # print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
+    # print(f"Elevation {response.Elevation()} m asl")
+    # print(f"Timezone {response.Timezone()}{response.TimezoneAbbreviation()}")
+    # print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
 
 	# Process hourly data. The order of variables needs to be the same as requested.
     hourly = response.Hourly( )
-    hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy()
-    hourly_relative_humidity_2m = hourly.Variables(1).ValuesAsNumpy()
-    hourly_precipitation = hourly.Variables(2).ValuesAsNumpy()
-    hourly_wind_speed_10m = hourly.Variables(3).ValuesAsNumpy()
+    hourly_temperature_2m = hourly.Variables(0).ValuesAsNumpy( )
+    hourly_relative_humidity_2m = hourly.Variables(1).ValuesAsNumpy( )
+    hourly_precipitation = hourly.Variables(2).ValuesAsNumpy( )
+    hourly_wind_speed_10m = hourly.Variables(3).ValuesAsNumpy( )
 
     hourly_data = { "date": pd.date_range(
         start = pd.to_datetime(hourly.Time(), unit = "s", utc = True),
@@ -186,7 +185,12 @@ def get_weather(lat, lon, dt):
     utc_dt = dt.astimezone(pytz.utc)
 
     specific_date = utc_dt.strftime("%Y-%m-%d %H:00:00+00:00")
-    selected_rows_specific_date = df.loc[specific_date]
+    
+    try:
+        selected_rows_specific_date = df.loc[specific_date]
+    except Exception as e:
+        print(f'Exception: {e}')
+        return False
 
     # print(selected_rows_specific_date)
     
