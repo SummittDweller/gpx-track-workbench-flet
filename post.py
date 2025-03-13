@@ -289,5 +289,18 @@ def post_gpx(st):
             md.write(' ')
             md.close( )
 
+    # All done loading. Now, commit and push the changes.
+    try:        
+        # Change directory to hikes
+        os.chdir(os.path.expanduser('~/GitHub/hikes'))
+        
+        # Git commands to commit and push changes
+        sub.run(['git', 'pull'], check=True)
+        sub.run(['git', 'add', '.'], check=True)
+        sub.run(['git', 'commit', '-m', 'Pushed from GPX-Track-Workbench'], check=True)
+        sub.run(['git', 'push'], check=True)
+        
+    except sub.CalledProcessError as e:
+        print(f"An error occurred: {e}")
+    
     return
-
