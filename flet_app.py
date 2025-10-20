@@ -332,7 +332,7 @@ class GPXTrackWorkbench:
                 ft.VerticalDivider(width=1),
                 self.menu_rail,
                 ft.VerticalDivider(width=1),
-                ft.Expanded(child=self.main_content)
+                ft.Container(content=self.main_content, expand=True)
             ], expand=True)
             
             self.page.add(main_row)
@@ -344,7 +344,7 @@ class GPXTrackWorkbench:
             new_content = self.create_main_content()
             # Find the main content in the row and replace it
             main_row = self.page.controls[0]  # Should be the Row
-            main_row.controls[-1] = ft.Expanded(child=new_content)
+            main_row.controls[-1] = ft.Container(content=new_content, expand=True)
             self.page.update()
 
 def main(page: ft.Page):
