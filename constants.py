@@ -1,6 +1,6 @@
 # constants.py
 
-APP_TITLE = 'GPX-Track-Workbench'
+APP_TITLE = 'GPX Track Workbench: Flet'
 
 SELECT = "Select GPX Tracks"
 UPLOAD = 'Upload GPX Data'

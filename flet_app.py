@@ -205,7 +205,7 @@ class GPXTrackWorkbench:
             content_column.append(
                 ft.Container(
                     content=ft.Column([
-                        ft.Text("GPX Track Workbench", size=24, weight=ft.FontWeight.BOLD),
+                        ft.Text("GPX Track Workbench: Flet", size=24, weight=ft.FontWeight.BOLD),
                         ft.Text("Select GPX files and choose an action from the menu", size=16),
                         fs.get_selection_info_ui(self.app_state)
                     ]),
@@ -349,7 +349,7 @@ class GPXTrackWorkbench:
 
 def main(page: ft.Page):
     """Main Flet application entry point"""
-    page.title = "GPX Track Workbench"
+    page.title = "GPX Track Workbench: Flet"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.window_width = 1200
     page.window_height = 800
