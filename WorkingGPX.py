@@ -1,7 +1,7 @@
 # Create the WorkingGPX and GPXList classes 
 
 import streamlit as st
-import functions as f
+# import functions as f  # COMMENTED OUT - functions.py removed
 import constants as c
 import gpxpy
 import pandas as pd
@@ -154,11 +154,13 @@ class WorkingGPX(object):
         # If source type is a Streamlit UploadedFile object...
         if t == st.runtime.uploaded_file_manager.UploadedFile:
             self.alias = source.name
-            (df, gpx) = f.uploaded_to_working(st, source)
+            # (df, gpx) = f.uploaded_to_working(st, source)  # COMMENTED OUT - functions.py removed
+            df, gpx = None, None  # TODO: Replace with Flet-compatible function
             if df.info and gpx:
                 self.df = df
                 self.gpx = gpx
-                self.fullname = f.save_temp_gpx(st, gpx, self.alias)
+                # self.fullname = f.save_temp_gpx(st, gpx, self.alias)  # COMMENTED OUT - functions.py removed
+                self.fullname = None  # TODO: Replace with Flet-compatible function
                 self.center = get_track_center(gpx)
                 self.datetime = dt = get_datetime(gpx)
                 self.place = identify_place(self.center[0], self.center[1])
@@ -185,15 +187,18 @@ class WorkingGPX(object):
     # --------------------------------------------------------------------------------
     def update_from_df(self, df):
         self.df = df
-        g = self.gpx = f.dataframe_to_gpx(df)
+        # g = self.gpx = f.dataframe_to_gpx(df)  # COMMENTED OUT - functions.py removed
+        g = self.gpx = None  # TODO: Replace with Flet-compatible function
         self.center = get_track_center(g)
         self.datetime = get_datetime(g)
         with open(self.fullname, 'w') as wf:
             wf.write(g.to_xml( ))
         msg = f"WorkingGPX.update_from_df( ) has updated object '{self.title}' as '{self.fullname}'."
-        f.state('logger').info(msg)
+        # f.state('logger').info(msg)  # COMMENTED OUT - functions.py removed
+        # logger.info(msg)  # TODO: Use logger directly
         # Store the new object in our GPXdict
-        d = f.state('GPXdict')
+        # d = f.state('GPXdict')  # COMMENTED OUT - functions.py removed
+        d = None  # TODO: Replace with Flet state management
         d.update(self)
         st.session_state.GPXdict = d
         return self
@@ -209,7 +214,8 @@ class WorkingGPX(object):
         except Exception as e:
             st.exception(f"Exception: {e}")
             return False
-        df = f.gpx_to_dataframe(st, gpx)
+        # df = f.gpx_to_dataframe(st, gpx)  # COMMENTED OUT - functions.py removed
+        df = None  # TODO: Replace with Flet-compatible function
         if isinstance(df, pd.DataFrame) and gpx:
             self.fullname = fullname
             self.df = df
@@ -218,7 +224,8 @@ class WorkingGPX(object):
             self.datetime = get_datetime(gpx)
             self.status = "Updated from GPX file {fullname}"
             # Store the new object in our GPXdict
-            d = f.state('GPXdict')
+            # d = f.state('GPXdict')  # COMMENTED OUT - functions.py removed
+            d = None  # TODO: Replace with Flet state management
             d.update(self)
             st.session_state.GPXdict = d
             return self
@@ -286,7 +293,8 @@ class GPXList( ):
     # print_GPXdict(st) - Print datafraes of all gox_list objects
     # ------------------------------------------------------------------------------------
     def print_GPXdict(self, st):
-        Gd = f.state('GPXdict')
+        # Gd = f.state('GPXdict')  # COMMENTED OUT - functions.py removed
+        Gd = None  # TODO: Replace with Flet state management
         if Gd:
             for key, WG in Gd.list.items( ):
                 heading = f"{key} is {WG.fullname}"

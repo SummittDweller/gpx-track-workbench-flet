@@ -2,7 +2,7 @@
 # Flet version of the uploader functionality
 
 import constants as c
-import functions as f
+# import functions as f  # COMMENTED OUT - functions.py removed
 import flet as ft
 from loguru import logger
 import WorkingGPX as WG

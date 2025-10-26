@@ -10,17 +10,18 @@ import flet as ft
 from loguru import logger
 
 import constants as c
-import functions as f
+# import functions as f  # COMMENTED OUT - functions.py removed
 import flet_uploader as fu
 import flet_selector as fs
 import WorkingGPX as WG
 import FletStatusBox as FSB
 
 # Import the original modules for processing (these should work with minor modifications)
-import editor as e
-import map as m
-import speed as s
-import post as p
+# COMMENTED OUT - Streamlit modules removed
+# import editor as e
+# import map as m
+# import speed as s
+# import post as p
 
 class GPXTrackWorkbench:
     def __init__(self):
@@ -186,12 +187,12 @@ class GPXTrackWorkbench:
         selected_menu = self.app_state.get('selected_menu', 0)
         count = self.app_state.get('count', 0)
 
-        # If no files uploaded, show uploader
-        if count == 0:
-            return ft.Container(
-                content=fu.create_uploader_ui(self.app_state, self.on_file_upload_complete),
-                padding=20
-            )
+        # # If no files uploaded, show uploader
+        # if count == 0:
+        #     return ft.Container(
+        #         content=fu.create_uploader_ui(self.app_state, self.on_file_upload_complete),
+        #         padding=20
+        #     )
 
         # Show selector if files are uploaded
         content_column = [
@@ -205,10 +206,101 @@ class GPXTrackWorkbench:
             content_column.append(
                 ft.Container(
                     content=ft.Column([
-                        ft.Text("GPX Track Workbench: Flet", size=24, weight=ft.FontWeight.BOLD),
-                        ft.Text("Select GPX files and choose an action from the menu", size=16),
+                        ft.Text("GPX Track Workbench", size=28, weight=ft.FontWeight.BOLD),
+                        ft.Divider(height=20),
+                        
+                        # Welcome section
+                        ft.Text("Welcome!", size=20, weight=ft.FontWeight.BOLD),
+                        ft.Text("Process and analyze GPX track data from your workouts and activities.", size=14),
+                        ft.Container(height=10),
+                        
+                        # Instructions for Apple Health export
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Text("📱 Exporting GPX Tracks from Apple Health", 
+                                       size=18, weight=ft.FontWeight.BOLD),
+                                ft.Container(height=5),
+                                ft.Text("Follow these steps to export your workout routes:", size=14),
+                                ft.Container(height=10),
+                                
+                                # Step-by-step instructions
+                                ft.Column([
+                                    ft.Row([
+                                        ft.Text("1.", weight=ft.FontWeight.BOLD, size=14),
+                                        ft.Column([
+                                            ft.Text("Open the Health app on your iPhone", size=14),
+                                        ], spacing=2),
+                                    ], spacing=5),
+                                    
+                                    ft.Row([
+                                        ft.Text("2.", weight=ft.FontWeight.BOLD, size=14),
+                                        ft.Column([
+                                            ft.Text("Tap your profile picture (top right)", size=14),
+                                        ], spacing=2),
+                                    ], spacing=5),
+                                    
+                                    ft.Row([
+                                        ft.Text("3.", weight=ft.FontWeight.BOLD, size=14),
+                                        ft.Column([
+                                            ft.Text("Scroll down and tap 'Export All Health Data'", size=14),
+                                        ], spacing=2),
+                                    ], spacing=5),
+                                    
+                                    ft.Row([
+                                        ft.Text("4.", weight=ft.FontWeight.BOLD, size=14),
+                                        ft.Column([
+                                            ft.Text("Wait for the export to complete (may take several minutes)", size=14),
+                                        ], spacing=2),
+                                    ], spacing=5),
+                                    
+                                    ft.Row([
+                                        ft.Text("5.", weight=ft.FontWeight.BOLD, size=14),
+                                        ft.Column([
+                                            ft.Text("Save the export.zip file to your computer", size=14),
+                                        ], spacing=2),
+                                    ], spacing=5),
+                                    
+                                    ft.Row([
+                                        ft.Text("6.", weight=ft.FontWeight.BOLD, size=14),
+                                        ft.Column([
+                                            ft.Text("Unzip the file - GPX tracks are in: workout-routes/", size=14),
+                                            ft.Text("Each workout with GPS data will have its own .gpx file", 
+                                                   size=12, italic=True, color=ft.colors.GREY_700),
+                                        ], spacing=2),
+                                    ], spacing=5),
+                                ], spacing=10),
+                                
+                                ft.Container(height=10),
+                                ft.Container(
+                                    content=ft.Text(
+                                        "💡 Tip: The export includes all your health data. Look for the 'workout-routes' folder which contains your GPX files.",
+                                        size=13,
+                                        italic=True,
+                                        color=ft.colors.BLUE_700
+                                    ),
+                                    padding=10,
+                                    bgcolor=ft.colors.BLUE_50,
+                                    border_radius=5
+                                ),
+                            ], spacing=5),
+                            padding=15,
+                            bgcolor=ft.colors.GREY_50,
+                            border_radius=10,
+                            border=ft.border.all(1, ft.colors.GREY_300)
+                        ),
+                        
+                        ft.Container(height=20),
+                        ft.Divider(),
+                        
+                        # Getting Started section
+                        ft.Text("🚀 Getting Started", size=18, weight=ft.FontWeight.BOLD),
+                        ft.Text("1. Upload GPX files using the uploader in the sidebar", size=14),
+                        ft.Text("2. Select the tracks you want to process", size=14),
+                        ft.Text("3. Choose an action from the menu (Edit, Map, Speed, Trim, Post)", size=14),
+                        ft.Container(height=10),
+                        
                         fs.get_selection_info_ui(self.app_state)
-                    ]),
+                    ], spacing=5),
                     padding=20
                 )
             )

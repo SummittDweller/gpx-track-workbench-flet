@@ -1,108 +1,167 @@
-# GPX Track Workbench: Flet# GPX-Track-Editor
+# GPX Track Workbench
 
+A desktop/mobile application built with Flet for processing and analyzing GPX track data. Created by combining elements of [gpx2hikes](https://github.com/SummittDweller/gpx2hikes) and various GPX processing tools, this is the app I use to edit GPX tracks for upload to https://hikes.summittdweller.com.
 
+## Features
 
-A desktop/mobile application built with Flet for processing and analyzing GPX track data. This is a native app version of the original Streamlit-based GPX Track Workbench, providing the same powerful GPX processing capabilities with a modern desktop interface.Created by combining elements of [gpx2hikes](https://github.com/SummittDweller/gpx2hikes) and [streamlit-folium](https://github.com/randyzwitch/streamlit-folium), this is the app I use to edit GPX tracks for upload to https://hikes.summittdweller.com. 
-
-
-
-## Features## Building Locally from Scratch
-
-
-
-- **GPX File Upload**: Drag-and-drop or browse to select multiple GPX filesThe following command sequence is recommended when building this app locally.  
-
+- **GPX File Upload**: Drag-and-drop or browse to select multiple GPX files
 - **Track Selection**: Choose specific tracks for processing with an intuitive interface
+- **Track Editing**: Modify GPX track data and metadata
+- **Interactive Mapping**: Visualize tracks on interactive maps
+- **Speed Analysis**: Analyze and add speed tags to track data
+- **Speed Trimming**: Remove sections of tracks based on speed thresholds
+- **Track Publishing**: Post processed tracks to your hiking blog/website
+- **Cross-platform**: Runs on Windows, macOS, Linux, and mobile
+- **Native performance**: Desktop application with native OS integration
+- **Offline Capable**: No internet connection required for core functionality
 
-- **Track Editing**: Modify GPX track data and metadata```zsh
+## Installation
 
-- **Interactive Mapping**: Visualize tracks on interactive maps╭─mark@Marks-Mac-Mini ~/GitHub/GPX-Track-Workbench ‹main› 
+### Prerequisites
 
-- **Speed Analysis**: Analyze and add speed tags to track data╰─$ python3 -m venv .venv  
+- Python 3.8 or higher
+- Git
 
-- **Speed Trimming**: Remove sections of tracks based on speed thresholds╭─mark@Marks-Mac-Mini ~/GitHub/GPX-Track-Workbench ‹main*› 
+### Setup
 
-- **Track Publishing**: Post processed tracks to your hiking blog/website╰─$ source .venv/bin/activate
-
-(.venv) ╭─mark@Marks-Mac-Mini ~/GitHub/GPX-Track-Workbench ‹main*› 
-
-## Installation╰─$ python --version  
-
-Python 3.13.1
-
-### Prerequisites(.venv) ╭─mark@Marks-Mac-Mini ~/GitHub/GPX-Track-Workbench ‹main*› 
-
-- Python 3.8 or higher╰─$ pip3 install -r python_requirements.txt
-
-- Git```
-
-
-
-### SetupIf there are updates made to the packages be sure to...   
-
-
-
-1. **Clone the repository:**```zsh
-
-   ```bash(.venv) ╭─mark@Marks-Mac-Mini ~/GitHub/GPX-Track-Workbench ‹main*› 
-
-   git clone https://github.com/SummittDweller/gpx-track-workbench-flet.git╰─$ pip3 freeze > python_requirements.txt      
-
-   cd gpx-track-workbench-flet```
-
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/SummittDweller/gpx-track-workbench-flet.git
+   cd gpx-track-workbench-flet
    ```
-
-## Running the App Locally
 
 2. **Create and activate a virtual environment:**
-
-   ```bashLike so:  
-
-   python -m venv .venv
-
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate```zsh
-
-   ```(.venv) ╭─mark@Marks-Mac-Mini ~/GitHub/GPX-Track-Workbench ‹main*› 
-
-╰─$ streamlit run app.py
-
-3. **Install dependencies:**```
-
    ```bash
-
-   pip install -r flet_requirements.txtIf that does not work, or to debug in VSCode, you should be more specific, like this:  
-
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
-```zsh
+3. **Install dependencies:**
+   ```bash
+   pip install -r flet_requirements.txt
+   ```
 
-## Usage(.venv) ╭─mark@Marks-Mac-Mini ~/GitHub/GPX-Track-Workbench ‹main*› 
+## Usage
 
-╰─$ cd /Users/mark/GitHub/GPX-Track-Workbench; 
-
-### Quick Start/usr/bin/env /Users/mark/GitHub/GPX-Track-Workbench/.venv/bin/python /Users/mark/.vscode/extensions/ms-python.debugpy-2024.15.2024121701-darwin-x64/bundled/libs/debugpy/adapter/../../debugpy/launcher 51475 -- -m streamlit run /Users/mark/GitHub/GPX-Track-Workbench/app.py --server.port 2000 
-
-```
+### Quick Start
 
 1. **Launch the application:**
-
-   ```bash...or just open the `app.py` file in VSCode and then `start the debugger from within the project's VSCode environment`.  
-
+   ```bash
    python run_flet.py
-
-   ```# Basic Operation
-
+   ```
+   
    or
-
-   ```bashThe app is controled by the left-hand sidebar where the user is promoted to navigate to and choose one or more GPX files using [st.file_uploader](https://docs.streamlit.io/develop/api-reference/widgets/st.file_uploader).  Selecting the GPX files creates a list `UploadedFile` objects.  A temporary file in TEMP_DIR, with a sanitized file name built from the `UploadedFile` `.name` property, is created and the temp file names populate `session_state['working_list']` in parallel to`session_state['uploaded_list']`.  
-
+   
+   ```bash
    python flet_app.py
+   ```
 
-   ```Each `UploadedFile` object has a `.name` property and `ByteIO` contents, but once the `working_list` files have been created they are used exclusively.    
+2. **Upload GPX files:**
+   - Click "Upload GPX Data" button
+   - Select one or more GPX files from your computer
+   - Files will be processed and made available for selection
 
+3. **Select tracks:**
+   - Use the GPX Selector to choose which tracks to work with
+   - Multiple tracks can be selected for batch operations
 
+4. **Choose an action:**
+   - **Edit**: Modify track data and metadata
+   - **Map**: View tracks on an interactive map
+   - **Speed**: Analyze and add speed information
+   - **Trim**: Remove slow sections from tracks
+   - **Post**: Publish tracks to your website
 
-2. **Upload GPX files:**The most important component in the code is `session_state['working_path']` which holds the complete file path of the CURRENT working file!  The contents of `working_path` is NEVER held in session_state, instead functions are provided to load its GPX data into either a Pandas `dataframe` or `df` variable, or into a `gpxPy` structure usually named `gpx`.    
+### Sample Data
+
+The `sample_data/` directory contains example GPX files for testing:
+- Various walking tracks with different characteristics
+- Use these to explore the application features
+
+## Architecture
+
+### Built with Flet
+
+- Modern UI framework for Python
+- Cross-platform desktop and mobile support
+- Native performance and responsive design
+
+### Core Components
+
+- **GPX Processing**: Robust GPX file parsing and manipulation
+- **Mapping**: Interactive maps powered by Folium
+- **Speed Analysis**: Sophisticated speed calculation and filtering
+- **Data Export**: Multiple output formats and publishing options
+
+## Development
+
+### Project Structure
+
+```
+├── flet_app.py              # Main Flet application
+├── run_flet.py              # Application launcher
+├── FletStatusBox.py         # Status display component
+├── flet_uploader.py         # File upload functionality
+├── flet_selector.py         # Track selection interface
+├── flet_functions.py        # State management utilities
+├── WorkingGPX.py           # Core GPX processing class
+├── constants.py            # Application constants
+└── sample_data/            # Example GPX files
+```
+
+## Configuration
+
+### Environment Variables
+
+Set these in your environment or create a `.env` file:
+
+```bash
+# Default paths (adjust for your system)
+RAW_GPX_DIR=/path/to/your/gpx/files
+CONTENT_HIKES_DIR=/path/to/your/blog/content
+STATIC_GPX_DIR=/path/to/your/blog/static/gpx
+
+# Weather API (optional, for enhanced track information)
+OPENWEATHER_API_KEY=your_api_key_here
+```
+
+### Speed Thresholds
+
+Adjust speed analysis thresholds in `constants.py`:
+- `SPEED_THRESHOLD`: Walking speed limit (default: 5 mph)
+- `BIKE_SPEED_THRESHOLD`: Cycling speed limit (default: 25 mph)
+
+## Contributing
+
+Contributions are welcome! This project is part of a larger GPX processing ecosystem.
+
+### Getting Started
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is open source. See the original project for license details.
+
+## Related Projects
+
+- **gpx2hikes**: Original GPX processing utilities
+- **Blog Integration**: Automated publishing to hiking blogs
+
+## Support
+
+- **Issues**: Report bugs and request features via GitHub Issues
+- **Documentation**: See `README_FLET.md` for technical implementation details
+- **Examples**: Check the `sample_data/` directory for example files
+
+## Acknowledgments
+
+This Flet version builds upon various open-source GPX processing tools, providing a native desktop experience with powerful GPX processing capabilities.
+
 
    - Click "Upload GPX Data" button
 

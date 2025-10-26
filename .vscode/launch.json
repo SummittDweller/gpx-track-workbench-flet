@@ -2,16 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Streamlit",
+            "name": "Python: Flet App",
             "type": "debugpy",
             "request": "launch",
-            "module": "streamlit",
-            "args": [
-                "run",
-                "app.py",
-                "--server.port",
-                "2000"
-            ]
+            "program": "${workspaceFolder}/run_flet.py",
+            "console": "integratedTerminal"
         }
     ]
 }
